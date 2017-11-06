@@ -1,0 +1,123 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww21160\viewh14100\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Card Game:\
+-Verschiedene Karten (Jede Karte jeweils selbst zusammenbauen (Wertpunkte verteilen) bevor man sie ausspielt)\
+-Die Karten werden abwechslungsweise auf einem 4x10 Spielfeld auf der eigenen H\'e4lfte(4x4) platziert und bewegen \
+sich von diesem Moment an selbstst\'e4ndig auf dem Spielfeld.\
+-Kommt eine Einheit auf der gegnerischen Grundlinie an, so ist das Spiel vorbei.\
+-Eine Einheit kann: 	-Sich vorw\'e4rts bewegen wenn der Platz frei ist\
+				-Benachbarten Einheiten Boosts geben (Schild, Angriffskraft etc\'85)\
+				-Eine Gegnerische Einheit angreifen (Single target, AOE)\
+				-Verb\'fcndete Einheiten heilen\
+				-Sterben\
+-Die Aktionen werden in einer vorbestimmten Reihenfolge ausgef\'fchrt:\
+	-Karte ausspielen\
+	-Bewegen (falls m\'f6glich)\
+	-Boosts wirken\
+	-Heilen\
+	-Angreifen\
+\
+\
+Zugablauf:\
+-Werte verteilen\
+-Karte platzieren\
+-Zug abschicken (Koordinaten und Werte)\
+-Einheitenbewegung\
+\
+Einheitenbewegung:\
+-Ausf\'fchrung von vorne nach hinten und von oben nach unten\
+-Einheitenaktionen:\
+	-Schild\
+	-Boost heilen\
+	-Boost angriff\
+	-Bewegen (Falls Feld frei ist)\
+	-Angreifen\
+	-Heilen\
+\
+\
+Schieberegler:\
+-Range Boost/Heilen\
+	0.Stufe: 0 Felder\
+	1.Stufe: 2 Felder (Links/Rechts)\
+	2.Stufe: 5 Felder (Vordere 3)\
+	3.Stufe: 8 Felder (Hintere 3)\
+-Range Angriff\
+	0.Stufe: 1 Feld\
+	1.Stufe: 4 Felder\
+	2.Stufe: 6 Felder (Links, Rechts)\
+	3.Stufe: 8 Felder (2 Vorne links/rechts)\
+-Health\
+	0.Stufe: 100 Hp\
+	1.Stufe: 150 Hp\
+	2.Stufe: 200 Hp\
+	3.Stufe: 250 Hp\
+	4.Stufe: 300 Hp\
+-Angriff\
+	0.Stufe: 10 Ap\
+	1.Stufe: 25 Ap\
+	2.Stufe: 50 Ap\
+	3.Stufe: 75 Ap\
+	4.Stufe: 100 Ap\
+-Heilen\
+	0.Stufe: 0 Hp\
+	1.Stufe: 10 Hp\
+	2.Stufe 20 Hp\
+	3.Stufe 30 Hp\
+	4.Stufe 40 Hp\
+-Boost Angriff\
+	0.Stufe: +0\
+	1.Stufe: +10\
+	2.Stufe: +20\
+	3.Stufe: +30\
+	4.Stufe: +40\
+-Boost Heilen\
+	0.Stufe: +0\
+	1.Stufe: +10\
+	2.Stufe: +20\
+	3.Stufe: +30\
+	4.Stufe: +40\
+-Schild:\
+	0.Stufe: 0\
+	1.Stufe: 50\
+	2.Stufe: 100\
+	3.Stufe: 150\
+	4.Stufe: 200\
+\
+Bei Kommastellen:\
+-Heilen: aufrunden\
+-Angriff: abrunden\
+\
+\
+\
+Todos:\
+\
+Server:\
+-Sollte auf einer Adresse und einem Port laufen (local oder hosted, in der App ist die Serveradresse einstellbar)\
+-Empf\'e4ngt TCP-Anfragen\
+-Anfragetypen:\
+	-findMatch(UUID):\
+		Der Server speichert die Anfrage und antwortet wenn ein Gegner gefunden wurde mit dessen UUID und Startinformationen (Erster Spieler am Zug)\
+	-send()\
+		Sendet einen Spielzug an den Server. Dieser wird einfach an den Gegner weitergeleitet.\
+-Ein Spieler hat jeweils 30 Sekunden Zeit f\'fcr seinen Zug. Danach sendet der Server automatisch einen Skip-Zug an den Gegner (Zwei aufeinanderfolgende verpasste Z\'fcge werden als quit gewertet)\
+-Wird das Spiel auf irgendeine Art (quit, victory, timeout) beendet, so wird die TCP-Verbindung getrennt und das Spiel vom Server entfernt.\
+\
+\
+Client:\
+-StartMenu:\
+	-Settings\
+		Set server address\
+	-Search Game:\
+		Connect to server and wait for a match\
+-Game:\
+	-Play -> Send turn -> Wait for opponents turn\'85.. -> Return to StartMenu\
+	-Return to StartMenu\
+	-Gamelibrary: libgdx?\
+\
+\
+}
