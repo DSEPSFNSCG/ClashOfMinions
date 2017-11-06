@@ -25,12 +25,9 @@ Zugablauf:
 Einheitenbewegung:
 -Ausführung von vorne nach hinten und von oben nach unten
 -Einheitenaktionen:
-	-Schild
-	-Boost heilen
-	-Boost angriff
 	-Bewegen (Falls Feld frei ist)
-	-Angreifen
-	-Heilen
+	-Angreifen (mit potentiellen boosts)
+	-Heilen (mit potentiellen boosts)
 
 
 Schieberegler:
