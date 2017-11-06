@@ -1,0 +1,115 @@
+Card Game:
+-Verschiedene Karten (Jede Karte jeweils selbst zusammenbauen (Wertpunkte verteilen) bevor man sie ausspielt)
+-Die Karten werden abwechslungsweise auf einem 4x10 Spielfeld auf der eigenen Hälfte(4x4) platziert und bewegen 
+sich von diesem Moment an selbstständig auf dem Spielfeld.
+-Kommt eine Einheit auf der gegnerischen Grundlinie an, so ist das Spiel vorbei.
+-Eine Einheit kann: 	-Sich vorwärts bewegen wenn der Platz frei ist
+				-Benachbarten Einheiten Boosts geben (Schild, Angriffskraft etc…)
+				-Eine Gegnerische Einheit angreifen (Single target, AOE)
+				-Verbündete Einheiten heilen
+				-Sterben
+-Die Aktionen werden in einer vorbestimmten Reihenfolge ausgeführt:
+	-Karte ausspielen
+	-Bewegen (falls möglich)
+	-Boosts wirken
+	-Heilen
+	-Angreifen
+
+
+Zugablauf:
+-Werte verteilen
+-Karte platzieren
+-Zug abschicken (Koordinaten und Werte)
+-Einheitenbewegung
+
+Einheitenbewegung:
+-Ausführung von vorne nach hinten und von oben nach unten
+-Einheitenaktionen:
+	-Schild
+	-Boost heilen
+	-Boost angriff
+	-Bewegen (Falls Feld frei ist)
+	-Angreifen
+	-Heilen
+
+
+Schieberegler:
+-Range Boost/Heilen
+	0.Stufe: 0 Felder
+	1.Stufe: 2 Felder (Links/Rechts)
+	2.Stufe: 5 Felder (Vordere 3)
+	3.Stufe: 8 Felder (Hintere 3)
+-Range Angriff
+	0.Stufe: 1 Feld
+	1.Stufe: 4 Felder
+	2.Stufe: 6 Felder (Links, Rechts)
+	3.Stufe: 8 Felder (2 Vorne links/rechts)
+-Health
+	0.Stufe: 100 Hp
+	1.Stufe: 150 Hp
+	2.Stufe: 200 Hp
+	3.Stufe: 250 Hp
+	4.Stufe: 300 Hp
+-Angriff
+	0.Stufe: 10 Ap
+	1.Stufe: 25 Ap
+	2.Stufe: 50 Ap
+	3.Stufe: 75 Ap
+	4.Stufe: 100 Ap
+-Heilen
+	0.Stufe: 0 Hp
+	1.Stufe: 10 Hp
+	2.Stufe 20 Hp
+	3.Stufe 30 Hp
+	4.Stufe 40 Hp
+-Boost Angriff
+	0.Stufe: +0
+	1.Stufe: +10
+	2.Stufe: +20
+	3.Stufe: +30
+	4.Stufe: +40
+-Boost Heilen
+	0.Stufe: +0
+	1.Stufe: +10
+	2.Stufe: +20
+	3.Stufe: +30
+	4.Stufe: +40
+-Schild:
+	0.Stufe: 0
+	1.Stufe: 50
+	2.Stufe: 100
+	3.Stufe: 150
+	4.Stufe: 200
+
+Bei Kommastellen:
+-Heilen: aufrunden
+-Angriff: abrunden
+
+
+
+Todos:
+
+Server:
+-Sollte auf einer Adresse und einem Port laufen (local oder hosted, in der App ist die Serveradresse einstellbar)
+-Empfängt TCP-Anfragen
+-Anfragetypen:
+	-findMatch(UUID):
+		Der Server speichert die Anfrage und antwortet wenn ein Gegner gefunden wurde mit dessen UUID und Startinformationen (Erster Spieler am Zug)
+	-send()
+		Sendet einen Spielzug an den Server. Dieser wird einfach an den Gegner weitergeleitet.
+-Ein Spieler hat jeweils 30 Sekunden Zeit für seinen Zug. Danach sendet der Server automatisch einen Skip-Zug an den Gegner (Zwei aufeinanderfolgende verpasste Züge werden als quit gewertet)
+-Wird das Spiel auf irgendeine Art (quit, victory, timeout) beendet, so wird die TCP-Verbindung getrennt und das Spiel vom Server entfernt.
+
+
+Client:
+-StartMenu:
+	-Settings
+		Set server address
+	-Search Game:
+		Connect to server and wait for a match
+-Game:
+	-Play -> Send turn -> Wait for opponents turn….. -> Return to StartMenu
+	-Return to StartMenu
+	-Gamelibrary: libgdx?
+
+
