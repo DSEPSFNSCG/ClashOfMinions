@@ -4,7 +4,7 @@
 Client -> Server, looking for new game
 
 ```json
-{ 
+{
   "type" : "searchGame",
   "name" : "paul",
 }
@@ -20,10 +20,10 @@ if 2 players found, Server -> Client, game found
   "otherPlayername" : "betty",
   "canStart" : true,
   "gameId" : 1,
-  // Token is unique and random per player and persistent
   "token" : "rCHurocahulraoceducraogedu",
 }
 ```
+Token is unique and random per player and persistent
 
 # Place Unit
 
@@ -52,9 +52,10 @@ Server -> Client that placed unit
 {
   "type" : "placeSuccess",
   "success" : true,
-  (potential) "error" : "unit already in that place",
+  "error" : "unit already in that place",
 }
 ```
+error is optional
 
 Server -> Client that didn't place unit
 
@@ -89,15 +90,14 @@ Client -> Server
   "type" : "restoreRequest",
   "gameId" : 1,
   "token" : "rcL42ueogdurocgdrC",
-  "getHistoryFrom" : 10, // request history from 10th action
+  "getHistoryFrom" : 10,
 }
 ```
-
+request history from 10th action
 ```json
-{ 
+{
   "type" : "restoreReply",
   "success" : true,
-  // if false, history.size() == 0
   "history" : [
     {
       "id" : 10,
@@ -135,6 +135,7 @@ Client -> Server
 }
 
 ```
+if false, history.size() == 0
 
 # ToDo
 
