@@ -31,7 +31,7 @@ Client -> Server
 
 ```json
 {
-  "type" : "placeUnit",
+  "type" : "placeRequest",
   "position" : {
     "x" : 3,
     "y" : 5,
@@ -46,11 +46,11 @@ Client -> Server
 }
 ```
 
-Server -> Client that placed unit
+Server -> Client that requested unit placement
 
 ```json
 {
-  "type" : "placeSuccess",
+  "type" : "placeReply",
   "success" : true,
   "error" : "unit already in that place",
 }
