@@ -7,6 +7,10 @@ import com.mygdx.game.CardGame;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+		config.height = (int) CardGame.HEIGHT;
+		config.width = (int) CardGame.WIDTH;
+		config.resizable = false;
+		//config.fullscreen = true;
 		new LwjglApplication(new CardGame(), config);
 	}
 }
