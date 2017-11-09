@@ -3,11 +3,13 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.mygdx.game.Nodes.ButtonNode;
 
 /**
  * Created by greensn on 08.11.17.
@@ -31,7 +33,9 @@ public class SettingsScreen implements Screen {
         //table.setDebug(true);
         stage.addActor(table);
 
-        TextButton backButton = new TextButton("Back", game.skin);
+        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
+        backButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
 
         table.add(backButton);
 

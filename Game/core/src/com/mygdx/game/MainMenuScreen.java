@@ -39,8 +39,13 @@ public class MainMenuScreen implements Screen {
         //table.setDebug(true);
         stage.addActor(table);
 
-        TextButton playButton = new TextButton("Play", game.skin);
-        TextButton settingsButton = new TextButton("Settings", game.skin);
+        ButtonNode playButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        playButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
+        playButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
+
+        ButtonNode settingsButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        settingsButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
+        settingsButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
 
         table.add(playButton).padBottom(50);
         table.row();
