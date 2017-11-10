@@ -20,6 +20,8 @@ public class BattleFieldLogic {
     public final ArrayList<MinionNode> leftPlayerMinions = new ArrayList<MinionNode>();
     public final ArrayList<MinionNode> rightPlayerMinions = new ArrayList<MinionNode>();
 
+    public final ArrayList<MinionNode> movedMinions = new ArrayList<MinionNode>();
+
     public BattleFieldLogic(int width, int height){
         this.width = width;
         this.height = height;
@@ -34,8 +36,12 @@ public class BattleFieldLogic {
         }
     }
 
-    public void addMinion(MinionNode m, int x, int y){
-        if(width>x&&x>=0&&height>y&&y>=0) {
+    public void addMinion(MinionNode m){
+        addMinion(m, m.minion.xPos, m.minion.yPos);
+    }
+    
+
+	public void addMinion(MinionNode m, int x, int y){        if(width>x&&x>=0&&height>y&&y>=0) {
             if (field[x][y] == null) {
                 field[x][y] = m;
                 m.minion.xPos = x;
@@ -60,13 +66,17 @@ public class BattleFieldLogic {
         for(MinionNode n:curMinions){
             Minion m = n.minion;
             if(field[m.xPos+xMod][m.yPos]==null){
-                ++m.xPos;
+                int  oldXpos = m.xPos;
+                int newXPos = m.xPos + xMod;
+                m.xPos = newXPos;
+                field[newXPos][m.yPos] = n;
+                field[oldXpos][m.yPos] = null;
+
+                movedMinions.add(n);
                 if((isLeftPlayerTurn&&m.xPos == width-1)||((!isLeftPlayerTurn)&&m.xPos==0)){
                     gameOver = true;
                     return true;
                 }
-                field[m.xPos+xMod][m.yPos] = n;
-                field[m.xPos][m.yPos] = null;
             }
         }
         Collections.sort(curMinions, new Comparator<MinionNode>() {
@@ -228,10 +238,13 @@ public class BattleFieldLogic {
      */
     public boolean doGameStep(){
         if(gameOver) return true;
+
+        movedMinions.clear();
+
         if(doMovement()) return true;
 
-        doBuffs();
-        doAttacks();
+        //doBuffs();
+        //doAttacks();
 
         isLeftPlayerTurn = !isLeftPlayerTurn;
         return false;

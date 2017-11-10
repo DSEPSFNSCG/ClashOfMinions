@@ -13,15 +13,17 @@ import com.mygdx.game.UIConstants;
 public class MinionNode extends Actor {
     public final Minion minion;
 
-    Texture minionTexture = new Texture(Gdx.files.internal("Minion.png"));
+    Texture minionTexture;
+
+    public MinionNode(boolean isLeftPlayer){
+        minion = new Minion(isLeftPlayer);
+
+        if (minion.isLeftPlayer) {minionTexture = new Texture(Gdx.files.internal("Minion-Blue.png"));}
+        else {minionTexture = new Texture(Gdx.files.internal("Minion-Red.png"));}
+    }
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         batch.draw(minionTexture, getX(), getY(), getWidth(), getHeight());
-    }
-
-    public MinionNode(boolean isLeftPlayer){
-        super();
-        minion = new Minion(isLeftPlayer);
     }
 }
