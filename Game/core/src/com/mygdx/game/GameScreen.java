@@ -104,6 +104,7 @@ public class GameScreen implements Screen {
             public void clicked(InputEvent event, float x, float y)
             {
                 System.out.println("Turn");
+                battleField.placeFloatingMinion();
             }
         });
     }

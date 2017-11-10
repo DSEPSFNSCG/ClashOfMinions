@@ -19,6 +19,8 @@ public class BattleFieldLogic {
     public final ArrayList<MinionNode> leftPlayerMinions = new ArrayList<MinionNode>();
     public final ArrayList<MinionNode> rightPlayerMinions = new ArrayList<MinionNode>();
 
+    public final ArrayList<MinionNode> movedMinions = new ArrayList<MinionNode>();
+
     public BattleFieldLogic(int width, int height){
         this.width = width;
         this.height = height;
@@ -31,6 +33,10 @@ public class BattleFieldLogic {
         }else{
             return null;
         }
+    }
+
+    public boolean addMinion(MinionNode m){
+        return addMinion(m, m.minion.xPos, m.minion.yPos);
     }
 
     public boolean addMinion(MinionNode m, int x, int y){
@@ -59,13 +65,17 @@ public class BattleFieldLogic {
         for(MinionNode n:curMinions){
             Minion m = n.minion;
             if(field[m.xPos+xMod][m.yPos]==null){
-                ++m.xPos;
+                int  oldXpos = m.xPos;
+                int newXPos = m.xPos + xMod;
+                m.xPos = newXPos;
+                field[newXPos][m.yPos] = n;
+                field[oldXpos][m.yPos] = null;
+
+                movedMinions.add(n);
                 if((isLeftPlayerTurn&&m.xPos == width-1)||((!isLeftPlayerTurn)&&m.xPos==0)){
                     gameOver = true;
                     return true;
                 }
-                field[m.xPos+xMod][m.yPos] = n;
-                field[m.xPos][m.yPos] = null;
             }
         }
         Collections.sort(curMinions, new Comparator<MinionNode>() {
@@ -178,10 +188,13 @@ public class BattleFieldLogic {
      */
     public boolean doGameStep(){
         if(gameOver) return true;
+
+        movedMinions.clear();
+
         if(doMovement()) return true;
 
-        doBuffs();
-        doAttacks();
+        //doBuffs();
+        //doAttacks();
 
         return false;
     }

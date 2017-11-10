@@ -34,8 +34,9 @@ public class BattleField extends Group {
     public void setup()
     {
         Image bg = new Image(backgroundTexture);
-        bg.setWidth(getWidth());
-        bg.setHeight(getHeight());
+        bg.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal * (UIConstants.battleFieldTilesHorizontal + 2));
+        bg.setHeight(getHeight()/UIConstants.battleFieldTilesHorizontal * (UIConstants.battleFieldTilesHorizontal + 2));
+        bg.setPosition(-(bg.getWidth() - getWidth())/2, -(bg.getHeight() - getHeight())/2);
 
         addActor(bg);
 
@@ -66,6 +67,7 @@ public class BattleField extends Group {
     {
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
         if (coord.x >= 4) return;
+        if (battleFieldLogic.getMinionNode(coord.x, coord.y) != null) return;
 
         if (floatingMinion == null) {
             floatingMinion = new MinionNode(true); //only for left side player so far
@@ -78,6 +80,8 @@ public class BattleField extends Group {
 
         Vector2 newPosition = coordinatesToPosition(coord);
         floatingMinion.setPosition(newPosition.x, newPosition.y);
+        floatingMinion.minion.xPos = coord.x;
+        floatingMinion.minion.yPos = coord.y;
     }
 
     GridPoint2 positionToCoordinates(Vector2 pos)
@@ -101,5 +105,26 @@ public class BattleField extends Group {
         float w = getWidth()/UIConstants.battleFieldTilesHorizontal;
 
         return new Vector2(w * coord.x, h * coord.y);
+    }
+
+    public void placeFloatingMinion()
+    {
+        if (floatingMinion != null)
+        {
+            battleFieldLogic.addMinion(floatingMinion);
+            floatingMinion = null;
+        }
+        else
+        {
+
+        }
+
+        battleFieldLogic.doGameStep();
+
+        for (MinionNode node : battleFieldLogic.movedMinions)
+        {
+            Vector2 newPosition = coordinatesToPosition(new GridPoint2(node.minion.xPos, node.minion.yPos));
+            node.setPosition(newPosition.x, newPosition.y);
+        }
     }
 }
