@@ -27,6 +27,11 @@ public class Minion {
     }
 
     private final int[] attributes = new int[numAttributes];
+    public final boolean isLeftPlayer;
+
+    public Minion(boolean isLeftPlayer){
+        this.isLeftPlayer = isLeftPlayer;
+    }
 
     public boolean setAttribute(String s, int v){
         if(v<0) return false;

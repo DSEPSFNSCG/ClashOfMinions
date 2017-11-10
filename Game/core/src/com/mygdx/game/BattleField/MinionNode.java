@@ -20,8 +20,8 @@ public class MinionNode extends Actor {
         batch.draw(minionTexture, getX(), getY(), getWidth(), getHeight());
     }
 
-    public MinionNode(){
+    public MinionNode(boolean isLeftPlayer){
         super();
-        minion = new Minion();
+        minion = new Minion(isLeftPlayer);
     }
 }

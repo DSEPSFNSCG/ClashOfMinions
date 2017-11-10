@@ -20,6 +20,7 @@ import com.mygdx.game.UIConstants;
 public class BattleField extends Group {
 
     Texture backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
+    BattleFieldLogic battleFieldLogic;
 
     MinionNode floatingMinion;
     GameScreen game;
@@ -27,6 +28,7 @@ public class BattleField extends Group {
     public BattleField(GameScreen game)
     {
         this.game = game;
+        battleFieldLogic = new BattleFieldLogic(UIConstants.battleFieldTilesHorizontal,UIConstants.battleFieldTilesVertical);
     }
 
     public void setup()
@@ -66,7 +68,7 @@ public class BattleField extends Group {
         if (coord.x >= 4) return;
 
         if (floatingMinion == null) {
-            floatingMinion = new MinionNode();
+            floatingMinion = new MinionNode(true); //only for left side player so far
             floatingMinion.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal);
             floatingMinion.setHeight(getHeight()/UIConstants.battleFieldTilesVertical);
             addActor(floatingMinion);
