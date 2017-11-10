@@ -9,7 +9,7 @@ import java.util.Map;
  */
 
 public class Minion {
-    public static final int numAttributes = 10;
+    public static final int numAttributes = 12;
     private static final HashMap<String,Integer> AttributeMap; // All values except for range should be direct values, not level values. I.E., Atk buff would be 10 and not 1.
     static{
         AttributeMap = new HashMap<String, Integer>();
@@ -23,6 +23,8 @@ public class Minion {
         AttributeMap.put("ShieldBuff",7);
         AttributeMap.put("BuffedAtk",8);
         AttributeMap.put("BuffedHealing",9);
+        AttributeMap.put("MaxHealth", 10);
+        AttributeMap.put("Shield", 11);
     }
     public static Map<String, Integer> getAttributeMap(){
         return Collections.unmodifiableMap(AttributeMap);

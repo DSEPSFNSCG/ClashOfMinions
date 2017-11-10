@@ -219,6 +219,7 @@ public class BattleFieldLogic {
                 MinionNode[] pair = {n,target};
                 minionHeals.add(pair);
                 targetm.setAttribute("Health", targetm.getAttribute("Health") + healing);
+                if(targetm.getAttribute("Health")>targetm.getAttribute("MaxHealth")) targetm.setAttribute("Health",targetm.getAttribute("MaxHealth"));
             }
         }
     }
@@ -281,7 +282,16 @@ public class BattleFieldLogic {
             AD = AD/atkTargets.size();
             for (MinionNode targetn : atkTargets){
                 Minion targetm = targetn.minion;
-                targetm.setAttribute("Health",targetm.getAttribute("Health")-AD);
+                int shield = targetm.getAttribute("Shield");
+                if(shield == 0) {
+                    targetm.setAttribute("Health", targetm.getAttribute("Health") - AD);
+                }else{
+                    shield -= AD;
+                    targetm.setAttribute("Shield", shield);
+                    if(shield <0){
+                        targetm.setAttribute("Health", targetm.getAttribute("Health") + shield);
+                    }
+                }
                 MinionNode[] pair = {n,targetn};
                 minionAttacks.add(pair);
                 if(targetm.getAttribute("Health")==0){
