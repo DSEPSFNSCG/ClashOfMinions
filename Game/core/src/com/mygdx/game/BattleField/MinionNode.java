@@ -11,7 +11,7 @@ import com.mygdx.game.UIConstants;
  */
 
 public class MinionNode extends Actor {
-    private final Minion minion;
+    public final Minion minion;
 
     Texture minionTexture = new Texture(Gdx.files.internal("Minion.png"));
 

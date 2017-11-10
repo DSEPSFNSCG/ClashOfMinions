@@ -28,6 +28,8 @@ public class Minion {
 
     private final int[] attributes = new int[numAttributes];
     public final boolean isLeftPlayer;
+    public int xPos;
+    public int yPos;
 
     public Minion(boolean isLeftPlayer){
         this.isLeftPlayer = isLeftPlayer;
