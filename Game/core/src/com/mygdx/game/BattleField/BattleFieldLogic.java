@@ -5,6 +5,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * Created by 2weirdy on 2017-11-10.
@@ -21,6 +22,7 @@ public class BattleFieldLogic {
     public final ArrayList<MinionNode> rightPlayerMinions = new ArrayList<MinionNode>();
 
     public final ArrayList<MinionNode> movedMinions = new ArrayList<MinionNode>();
+    public final HashMap<MinionNode, Integer> oldHealth = new HashMap<MinionNode, Integer>();
     public final ArrayList<MinionNode[]> minionBuffs = new ArrayList<MinionNode[]>();
     public final ArrayList<MinionNode[]> minionAttacks = new ArrayList<MinionNode[]>();
     public final ArrayList<MinionNode[]> minionHeals = new ArrayList<MinionNode[]>();
@@ -255,6 +257,10 @@ public class BattleFieldLogic {
         minionBuffs.clear();
         minionAttacks.clear();
         minionHeals.clear();
+        ArrayList<MinionNode> otherMinions = isLeftPlayerTurn ? rightPlayerMinions : leftPlayerMinions;
+        for(MinionNode n:otherMinions){
+            oldHealth.put(n,n.minion.getAttribute("Health"));
+        }
 
         if(doMovement()) return true;
 
