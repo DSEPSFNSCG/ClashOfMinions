@@ -2,9 +2,7 @@ package com.mygdx.game.BattleField;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -20,9 +18,9 @@ import com.mygdx.game.UIConstants;
 public class BattleField extends Group {
 
     Texture backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
-    BattleFieldLogic battleFieldLogic;
+    public BattleFieldLogic battleFieldLogic;
 
-    MinionNode floatingMinion;
+    public MinionNode floatingMinion;
     GameScreen game;
 
     public BattleField(GameScreen game)
@@ -66,11 +64,13 @@ public class BattleField extends Group {
     void draggedTo(float x, float y)
     {
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
-        if (coord.x >= 4) return;
+        if (coord.x >= 4 && battleFieldLogic.isLeftPlayerTurn) return;
+        if (coord.x <= 5 && !battleFieldLogic.isLeftPlayerTurn) return;
+
         if (battleFieldLogic.getMinionNode(coord.x, coord.y) != null) return;
 
         if (floatingMinion == null) {
-            floatingMinion = new MinionNode(true); //only for left side player so far
+            floatingMinion = new MinionNode(battleFieldLogic.isLeftPlayerTurn); //only for left side player so far
             floatingMinion.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal);
             floatingMinion.setHeight(getHeight()/UIConstants.battleFieldTilesVertical);
             addActor(floatingMinion);
@@ -119,7 +119,12 @@ public class BattleField extends Group {
 
         }
 
-        battleFieldLogic.doGameStep();
+        Boolean gameOver = battleFieldLogic.doGameStep();
+
+        if (gameOver)
+        {
+            game.gameOver();
+        }
 
         for (MinionNode node : battleFieldLogic.movedMinions)
         {

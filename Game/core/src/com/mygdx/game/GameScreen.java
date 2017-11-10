@@ -7,18 +7,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.BattleField.BattleField;
 import com.mygdx.game.Nodes.ButtonNode;
 import com.mygdx.game.Nodes.ManaBarNode;
 import com.mygdx.game.Nodes.SliderNode;
+import com.mygdx.game.Nodes.SliderType;
 
 /**
  * Created by greensn on 08.11.17.
@@ -104,7 +99,7 @@ public class GameScreen implements Screen {
             public void clicked(InputEvent event, float x, float y)
             {
                 System.out.println("Turn");
-                battleField.placeFloatingMinion();
+                placeAction();
             }
         });
     }
@@ -117,9 +112,9 @@ public class GameScreen implements Screen {
         sliderGroup.setPosition(1f/30f * stage.getWidth(), 0.03f * stage.getHeight());
         stage.addActor(sliderGroup);
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < SliderType.numberOfTypes; i++)
         {
-            SliderNode slider = new SliderNode(20, manaBarNode);
+            SliderNode slider = new SliderNode(SliderType.values()[i], manaBarNode);
             slider.setPosition((0.04f + (0.12f * (float)i)) * sliderGroup.getWidth(), 0);
             slider.setWidth(0.08f * sliderGroup.getWidth());
             slider.setHeight(sliderGroup.getHeight());
@@ -181,5 +176,24 @@ public class GameScreen implements Screen {
     private void quitAction()
     {
         game.setScreen(new MainMenuScreen(game));
+    }
+
+    private void placeAction()
+    {
+        if (battleField.floatingMinion != null)
+        {
+            for (SliderNode slider:sliders)
+            {
+                battleField.floatingMinion.minion.setAttribute(slider.type.toString(), slider.getSliderValue());
+            }
+            battleField.floatingMinion.minion.setAttribute("MaxHealth", battleField.floatingMinion.minion.getAttribute("Health"));
+        }
+        battleField.placeFloatingMinion();
+    }
+
+    public void gameOver()
+    {
+        Boolean leftWinner = battleField.battleFieldLogic.isLeftPlayerTurn;
+        quitAction();
     }
 }

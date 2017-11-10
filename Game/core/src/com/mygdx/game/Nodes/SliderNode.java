@@ -18,15 +18,17 @@ public class SliderNode extends Actor {
     Texture sliderFillTexture;
     Texture sliderHandle;
 
+    public SliderType type;
     int sliderSteps;
-    int actualStep = 0;
+    public int actualStep = 0;
 
     ManaBarNode manaBarNode;
 
-    public SliderNode(int steps, ManaBarNode manaBar)
+    public SliderNode(SliderType type, ManaBarNode manaBar)
     {
         manaBarNode = manaBar;
-        sliderSteps = steps;
+        this.type = type;
+        sliderSteps = type.steps();
 
         backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
         sliderFillTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
@@ -87,5 +89,10 @@ public class SliderNode extends Actor {
          if (actualStep < 0) actualStep = 0;
 
          manaBarNode.actualStep -= actualStep;
+     }
+
+     public int getSliderValue()
+     {
+         return type.valueForStep(actualStep);
      }
 }
