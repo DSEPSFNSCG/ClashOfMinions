@@ -27,12 +27,23 @@ public class BattleFieldLogic {
     public final ArrayList<MinionNode[]> minionAttacks = new ArrayList<MinionNode[]>();
     public final ArrayList<MinionNode[]> minionHeals = new ArrayList<MinionNode[]>();
 
+    /**
+     * Basic Contructor
+     * @param width width of the field in squares
+     * @param height height of the field in squares
+     */
     public BattleFieldLogic(int width, int height){
         this.width = width;
         this.height = height;
         field = new MinionNode[width][height];
     }
 
+    /**
+     * Fetch a Minion Node at a specific position
+     * @param x
+     * @param y
+     * @return Minion node at the xy coordinate, or null if either the coordinate is invalid or no minion is there.
+     */
     public MinionNode getMinionNode(int x, int y){
         if(width>x&&x>=0&&height>y&&y>=0){
             return field[x][y];
@@ -41,12 +52,23 @@ public class BattleFieldLogic {
         }
     }
 
+    /**
+     * Used to add a minion with built in xy position.
+     * @param m Minion to be added.
+     */
     public void addMinion(MinionNode m){
         addMinion(m, m.minion.xPos, m.minion.yPos);
     }
 
 
-	public void addMinion(MinionNode m, int x, int y){
+    /**
+     * Used to add a minion with custom xy position.
+     * Will throw an Index out of bounds exception if the xy coordinate is invalid, and an illegal argument exception if there is already a minion at that position.
+     * @param m Minion to be added
+     * @param x x coordinate of the minion to be placed
+     * @param y y coordinate of the minion to be placed
+     */
+    public void addMinion(MinionNode m, int x, int y){
         if(width>x&&x>=0&&height>y&&y>=0) {
             if (field[x][y] == null) {
                 field[x][y] = m;
@@ -66,6 +88,10 @@ public class BattleFieldLogic {
         }
     }
 
+    /**
+     * Used to perform one turn of movement. Do not call this method.
+     * @return returns true if the movement is a winning one.
+     */
     public boolean doMovement(){
         ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
         final int xMod = isLeftPlayerTurn ? 1 : -1;
@@ -100,6 +126,12 @@ public class BattleFieldLogic {
         return false;
     }
 
+
+    /**
+     * Used to get the MinionNodes a certain minion can boost.
+     * @param n The MinionNode doing the boosting
+     * @return An arraylist containing the minions that can receive boosts.
+     */
     public ArrayList<MinionNode> getInBoostRange(MinionNode n){
         Minion m = n.minion;
         ArrayList<MinionNode> buffTargets = new ArrayList<MinionNode>();
@@ -150,6 +182,10 @@ public class BattleFieldLogic {
         return buffTargets;
     }
 
+
+    /**
+     * Used to apply buffs. Do not call this method.
+     */
     public void doBuffs(){
         ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
         for (MinionNode n : curMinions) {
@@ -182,6 +218,10 @@ public class BattleFieldLogic {
         }
     }
 
+
+    /**
+     * Used to perform attacks. Do not call this method.
+     */
     public void doAttacks(){
         ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
         final int xMod = isLeftPlayerTurn ? 1 : -1;
@@ -247,7 +287,7 @@ public class BattleFieldLogic {
     }
 
     /**
-     *
+     * Used to do one gamestep, regardless of whether a minion has been placed or not. Will switch turns. If a player has won, this method will do nothing.
      * @return returns true if a player has won. Which player has won can be obtained from the field isLeftPlayerTurn.
      */
     public boolean doGameStep(){
@@ -271,8 +311,18 @@ public class BattleFieldLogic {
         return false;
     }
 
+    /**
+     * Preferred method for executing a turn. Adds the given minion node, then executes a turn if the player placing the minion is the one that should be taking a turn.
+     * Will throw IndexOutOfBounds Exception in case of invalid coordinates, IllegalArgumentException if there is already a minion at the spot you're trying to place a new one,
+     * and IllegalStateException if it's not the placing player's turn.
+     * @param m The MinionNode to be placed. Attributes must already be allocated or undefined behavior will happen.
+     * @param x
+     * @param y
+     * @param isLeftPlayer true if the player placing the minion is the one to the left.
+     * @return returns true if a player has won after this turn, and false otherwise.
+     */
     public boolean addMinionAsTurn(MinionNode m, int x, int y, boolean isLeftPlayer){
-        if(isLeftPlayer != isLeftPlayerTurn) throw new IllegalStateException("Not your turn you cheater!");
+        if(isLeftPlayer != isLeftPlayerTurn || isLeftPlayer != m.minion.isLeftPlayer) throw new IllegalStateException("Not your turn you cheater!");
         addMinion(m,x,y);
         return doGameStep();
     }
