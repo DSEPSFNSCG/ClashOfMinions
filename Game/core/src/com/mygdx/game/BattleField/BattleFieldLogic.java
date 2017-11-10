@@ -196,6 +196,9 @@ public class BattleFieldLogic {
             int atkbuff = m.getAttribute("AtkBuff");
             if(healbuff + atkbuff <= 0) continue;
             ArrayList<MinionNode> buffTargets = getInBoostRange(n);
+            if(buffTargets.size() == 0) continue;
+            atkbuff = atkbuff/buffTargets.size();
+            healbuff = (int)Math.ceil((double)healbuff/buffTargets.size());
             for (MinionNode target : buffTargets) {
                 Minion targetm = target.minion;
                 MinionNode[] pair = {n,target};
@@ -209,6 +212,8 @@ public class BattleFieldLogic {
             int healing = m.getAttribute("BuffedHealing");
             if(healing <= 0) continue;
             ArrayList<MinionNode> buffTargets = getInBoostRange(n);
+            if(buffTargets.size() == 0) continue;
+            healing = (int)Math.ceil((double)healing/buffTargets.size());
             for (MinionNode target : buffTargets) {
                 Minion targetm = target.minion;
                 MinionNode[] pair = {n,target};
@@ -272,6 +277,8 @@ public class BattleFieldLogic {
             }
 
             int AD = m.getAttribute("BuffedAtk");
+            if(atkTargets.size() == 0) continue;
+            AD = AD/atkTargets.size();
             for (MinionNode targetn : atkTargets){
                 Minion targetm = targetn.minion;
                 targetm.setAttribute("Health",targetm.getAttribute("Health")-AD);
