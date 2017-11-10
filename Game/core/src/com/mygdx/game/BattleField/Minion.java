@@ -38,7 +38,7 @@ public class Minion {
     }
 
     public boolean setAttribute(String s, int v){
-        if(v<0) return false;
+        if(v<0) v = 0;
         Integer i = AttributeMap.get(s);
         if(i != null){
             attributes[i] = v;
