@@ -60,7 +60,7 @@ public class BattleFieldLogic {
             Minion m = n.minion;
             if(field[m.xPos+xMod][m.yPos]==null){
                 ++m.xPos;
-                if(m.xPos == width-1){
+                if((isLeftPlayerTurn&&m.xPos == width-1)||((!isLeftPlayerTurn)&&m.xPos==0)){
                     gameOver = true;
                     return true;
                 }
@@ -165,6 +165,11 @@ public class BattleFieldLogic {
 
     public void doAttacks(){
         ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
+        final int xMod = isLeftPlayerTurn ? 1 : -1;
+        ArrayList<MinionNode> atkTargets;
+        for(MinionNode n: curMinions){
+            Minion m = n.minion;
+        }
     }
 
     /**
