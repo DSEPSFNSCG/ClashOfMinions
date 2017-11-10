@@ -131,9 +131,9 @@ public class GameScreen implements Screen {
     void setupBattleField()
     {
         battleField = new BattleField(this);
-        battleField.setPosition(UIConstants.battleFieldPositionX * stage.getWidth(), UIConstants.battleFieldPositionY * stage.getHeight());
-        battleField.setWidth(UIConstants.battleFieldWidth * stage.getWidth());
         battleField.setHeight(UIConstants.battleFieldHeight * stage.getHeight());
+        battleField.setWidth(battleField.getHeight()/UIConstants.battleFieldTilesVertical * UIConstants.battleFieldTilesHorizontal);
+        battleField.setPosition((stage.getWidth()-battleField.getWidth())/2, UIConstants.battleFieldPositionY * stage.getHeight());
         stage.addActor(battleField);
         battleField.setup();
     }

@@ -20,9 +20,9 @@ public class UIConstants {
     public static final int battleFieldTilesHorizontal = 10;
     public static final int battleFieldTilesVertical = 4;
 
+    public static final float battleFieldHeight = 0.5f;
+    public static final float battleFieldWidth = 0.95f;
     public static final float battleFieldPositionX = 0.025f;
     public static final float battleFieldPositionY = 0.42f;
-    public static final float battleFieldWidth = 0.95f;
-    public static final float battleFieldHeight = 0.5f;
 
 }
