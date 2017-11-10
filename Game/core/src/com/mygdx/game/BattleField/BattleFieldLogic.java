@@ -21,6 +21,9 @@ public class BattleFieldLogic {
     public final ArrayList<MinionNode> rightPlayerMinions = new ArrayList<MinionNode>();
 
     public final ArrayList<MinionNode> movedMinions = new ArrayList<MinionNode>();
+    public final ArrayList<MinionNode[]> minionBuffs = new ArrayList<MinionNode[]>();
+    public final ArrayList<MinionNode[]> minionAttacks = new ArrayList<MinionNode[]>();
+    public final ArrayList<MinionNode[]> minionHeals = new ArrayList<MinionNode[]>();
 
     public BattleFieldLogic(int width, int height){
         this.width = width;
@@ -39,9 +42,10 @@ public class BattleFieldLogic {
     public void addMinion(MinionNode m){
         addMinion(m, m.minion.xPos, m.minion.yPos);
     }
-    
 
-	public void addMinion(MinionNode m, int x, int y){        if(width>x&&x>=0&&height>y&&y>=0) {
+
+	public void addMinion(MinionNode m, int x, int y){
+        if(width>x&&x>=0&&height>y&&y>=0) {
             if (field[x][y] == null) {
                 field[x][y] = m;
                 m.minion.xPos = x;
@@ -152,9 +156,12 @@ public class BattleFieldLogic {
             Minion m = n.minion;
             int healbuff = m.getAttribute("HealBuff");
             int atkbuff = m.getAttribute("AtkBuff");
+            if(healbuff + atkbuff <= 0) continue;
             ArrayList<MinionNode> buffTargets = getInBoostRange(n);
             for (MinionNode target : buffTargets) {
                 Minion targetm = target.minion;
+                MinionNode[] pair = {n,target};
+                minionBuffs.add(pair);
                 targetm.setAttribute("BuffedAtk", targetm.getAttribute("BuffedAtk") + atkbuff);
                 targetm.setAttribute("BuffedHealing", targetm.getAttribute("BuffedHealing") + healbuff);
             }
@@ -162,9 +169,12 @@ public class BattleFieldLogic {
         for (MinionNode n : curMinions) {
             Minion m = n.minion;
             int healing = m.getAttribute("BuffedHealing");
+            if(healing <= 0) continue;
             ArrayList<MinionNode> buffTargets = getInBoostRange(n);
             for (MinionNode target : buffTargets) {
                 Minion targetm = target.minion;
+                MinionNode[] pair = {n,target};
+                minionHeals.add(pair);
                 targetm.setAttribute("Health", targetm.getAttribute("Health") + healing);
             }
         }
@@ -223,6 +233,8 @@ public class BattleFieldLogic {
             for (MinionNode targetn : atkTargets){
                 Minion targetm = targetn.minion;
                 targetm.setAttribute("Health",targetm.getAttribute("Health")-AD);
+                MinionNode[] pair = {n,targetn};
+                minionAttacks.add(pair);
                 if(targetm.getAttribute("Health")==0){
                     leftPlayerMinions.remove(targetm);
                     rightPlayerMinions.remove(targetm);
@@ -240,11 +252,14 @@ public class BattleFieldLogic {
         if(gameOver) return true;
 
         movedMinions.clear();
+        minionBuffs.clear();
+        minionAttacks.clear();
+        minionHeals.clear();
 
         if(doMovement()) return true;
 
-        //doBuffs();
-        //doAttacks();
+        doBuffs();
+        doAttacks();
 
         isLeftPlayerTurn = !isLeftPlayerTurn;
         return false;
