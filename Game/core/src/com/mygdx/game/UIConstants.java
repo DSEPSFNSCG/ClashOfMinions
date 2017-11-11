@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+
 /**
  * Created by greensn on 09.11.17.
  */
@@ -24,5 +26,7 @@ public class UIConstants {
     public static final float battleFieldWidth = 0.95f;
     public static final float battleFieldPositionX = 0.025f;
     public static final float battleFieldPositionY = 0.42f;
+
+    public static BitmapFont font;
 
 }

@@ -189,15 +189,15 @@ public class BattleFieldLogic {
     public void doBuffs(){
         ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
         for (MinionNode n : curMinions) {
-            n.minion.setAttribute("BuffedHealing",n.minion.getAttribute("Healing"));
-            n.minion.setAttribute("BuffedAtk",n.minion.getAttribute("AttackDmg"));
             Minion m = n.minion;
+            m.setAttribute("BuffedHealing",n.minion.getAttribute("Healing"));
+            m.setAttribute("BuffedAtk",n.minion.getAttribute("AttackDmg"));
             int healbuff = m.getAttribute("HealBuff");
             int atkbuff = m.getAttribute("AtkBuff");
             if(healbuff + atkbuff <= 0) continue;
             ArrayList<MinionNode> buffTargets = getInBoostRange(n);
             if(buffTargets.size() == 0) continue;
-            atkbuff = atkbuff/buffTargets.size();
+            atkbuff = (int)Math.floor((double)atkbuff/buffTargets.size());
             healbuff = (int)Math.ceil((double)healbuff/buffTargets.size());
             for (MinionNode target : buffTargets) {
                 Minion targetm = target.minion;
@@ -294,9 +294,9 @@ public class BattleFieldLogic {
                 }
                 MinionNode[] pair = {n,targetn};
                 minionAttacks.add(pair);
-                if(targetm.getAttribute("Health")==0){
-                    leftPlayerMinions.remove(targetm);
-                    rightPlayerMinions.remove(targetm);
+                if(targetm.getAttribute("Health")<=0){
+                    leftPlayerMinions.remove(targetn);
+                    rightPlayerMinions.remove(targetn);
                     field[targetm.xPos][targetm.yPos] = null;
                 }
             }

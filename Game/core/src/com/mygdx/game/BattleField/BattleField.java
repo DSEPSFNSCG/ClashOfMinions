@@ -3,10 +3,14 @@ package com.mygdx.game.BattleField;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.mygdx.game.GameScreen;
 import com.mygdx.game.UIConstants;
@@ -76,7 +80,7 @@ public class BattleField extends Group {
             addActor(floatingMinion);
         }
 
-        System.out.println("Dragged minion to: " + coord);
+        //System.out.println("Dragged minion to: " + coord);
 
         Vector2 newPosition = coordinatesToPosition(coord);
         floatingMinion.setPosition(newPosition.x, newPosition.y);
@@ -109,27 +113,64 @@ public class BattleField extends Group {
 
     public void placeFloatingMinion()
     {
+        Boolean gameOver = false;
+
         if (floatingMinion != null)
         {
-            battleFieldLogic.addMinion(floatingMinion);
+            gameOver = battleFieldLogic.addMinionAsTurn(floatingMinion, floatingMinion.minion.xPos, floatingMinion.minion.yPos, floatingMinion.minion.isLeftPlayer);
+            floatingMinion.updateHealth();
             floatingMinion = null;
         }
         else
         {
-
+            gameOver = battleFieldLogic.doGameStep();
         }
-
-        Boolean gameOver = battleFieldLogic.doGameStep();
 
         if (gameOver)
         {
             game.gameOver();
         }
 
+        float moveDuration = runMoveAnimations(0);
+        float attackDuration = runAttackAnimations(moveDuration);
+    }
+
+    float runMoveAnimations(float delay)
+    {
+        float duration = 0.5f;
         for (MinionNode node : battleFieldLogic.movedMinions)
         {
             Vector2 newPosition = coordinatesToPosition(new GridPoint2(node.minion.xPos, node.minion.yPos));
-            node.setPosition(newPosition.x, newPosition.y);
+            node.addAction(Actions.moveTo(newPosition.x, newPosition.y, duration, Interpolation.smooth));
+            //node.setPosition(newPosition.x, newPosition.y);
         }
+        return duration;
+    }
+
+    float runAttackAnimations(float delay)
+    {
+        float duration = 0.5f;
+        float sDelay = 0f;
+        for (MinionNode[] pair : battleFieldLogic.minionAttacks)
+        {
+            final MinionNode n1 = pair[0];
+            final MinionNode n2 = pair[1];
+            Vector2 p1 = coordinatesToPosition(new GridPoint2(n1.minion.xPos, n1.minion.yPos));
+            Vector2 p2 = coordinatesToPosition(new GridPoint2(n2.minion.xPos, n2.minion.yPos));
+            n1.addAction(Actions.sequence(
+                    Actions.delay(delay + sDelay),
+                    Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
+                    Actions.run(new Runnable() {@Override public void run() {n2.updateHealth();}}),
+                    Actions.moveTo(p1.x, p1.y, duration * 0.6f, Interpolation.elasticOut)));
+            if (n2.minion.getAttribute("Health") <= 0)
+            {
+                n2.addAction(Actions.sequence(
+                        Actions.delay(0.95f),
+                        Actions.fadeOut(0.2f),
+                        Actions.removeActor()));
+            }
+            sDelay += duration;
+        }
+        return duration;
     }
 }
