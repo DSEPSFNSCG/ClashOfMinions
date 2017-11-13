@@ -174,10 +174,8 @@ public class BattleFieldLogic {
                 if (t != null) {
                     if(t.minion.isLeftPlayer == m.isLeftPlayer) buffTargets.add(t);
                 }
-                break;
             case 0:
             default:
-                return null;
         }
         return buffTargets;
     }
