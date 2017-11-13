@@ -121,7 +121,11 @@ public class BattleFieldLogic {
 								if(t0.minion.xPos>t1.minion.xPos){
 										return xMod;
 								}
-								return 0;
+								if(t0.minion.yPos<t1.minion.yPos){
+								    return -xMod;
+                }else{
+								    return xMod;
+                }
 						}
 				});
 				return false;
