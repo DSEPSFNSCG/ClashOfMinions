@@ -151,25 +151,33 @@ public class BattleField extends Group {
     {
         float duration = 0.5f;
         float sDelay = 0f;
-        for (MinionNode[] pair : battleFieldLogic.minionAttacks)
+        for (BattleFieldLogic.Event event : battleFieldLogic.minionAttacks)
         {
-            final MinionNode n1 = pair[0];
-            final MinionNode n2 = pair[1];
-            Vector2 p1 = coordinatesToPosition(new GridPoint2(n1.minion.xPos, n1.minion.yPos));
-            Vector2 p2 = coordinatesToPosition(new GridPoint2(n2.minion.xPos, n2.minion.yPos));
-            n1.addAction(Actions.sequence(
-                    Actions.delay(delay + sDelay),
-                    Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
-                    Actions.run(new Runnable() {@Override public void run() {n2.updateHealth();}}),
-                    Actions.moveTo(p1.x, p1.y, duration * 0.6f, Interpolation.elasticOut)));
-            if (n2.minion.getAttribute("Health") <= 0)
-            {
-                n2.addAction(Actions.sequence(
-                        Actions.delay(0.95f),
-                        Actions.fadeOut(0.2f),
-                        Actions.removeActor()));
+            final MinionNode n1 = event.src;
+            for (int i = 0; i < event.targets.size(); i++) {
+                final MinionNode n2 = event.targets.get(i);
+                final int newHealth = n2.health-event.value;
+                final boolean lethal = event.lethal.get(i);
+                Vector2 p1 = coordinatesToPosition(new GridPoint2(n1.minion.xPos, n1.minion.yPos));
+                Vector2 p2 = coordinatesToPosition(new GridPoint2(n2.minion.xPos, n2.minion.yPos));
+                n1.addAction(Actions.sequence(
+                        Actions.delay(delay + sDelay),
+                        Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
+                        Actions.run(new Runnable() {
+                            @Override
+                            public void run() {
+                                n2.setHealth(newHealth);
+                            }
+                        }),
+                        Actions.moveTo(p1.x, p1.y, duration * 0.6f, Interpolation.elasticOut)));
+                if (lethal) {
+                    n2.addAction(Actions.sequence(
+                            Actions.delay(0.95f),
+                            Actions.fadeOut(0.2f),
+                            Actions.removeActor()));
+                }
+                sDelay += duration;
             }
-            sDelay += duration;
         }
         return duration;
     }

@@ -23,8 +23,8 @@ public class ManaBarNode extends Actor {
     {
         sliderSteps = steps;
 
-        backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
-        sliderFillTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+        sliderFillTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
     }
 
     @Override

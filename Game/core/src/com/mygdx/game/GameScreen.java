@@ -28,6 +28,7 @@ public class GameScreen implements Screen {
     ButtonNode turnButton;
 
     Texture backgroundTexture;
+    Texture turnButtonTexture;
 
     Group sliderGroup;
     Array<SliderNode> sliders = new Array<SliderNode>();
@@ -51,12 +52,12 @@ public class GameScreen implements Screen {
     {
         loadTextures();
 
-        quitButton = new ButtonNode(backgroundTexture);
+        quitButton = new ButtonNode(turnButtonTexture);
         quitButton.setHeight(0.075f * stage.getHeight());
         quitButton.setWidth(quitButton.getHeight());
         quitButton.setPosition(stage.getWidth() - quitButton.getWidth() - 10, stage.getHeight() - quitButton.getHeight() - 10);
 
-        turnButton = new ButtonNode(backgroundTexture);
+        turnButton = new ButtonNode(turnButtonTexture);
         turnButton.setPosition((1 - (0.1f + 1f/30f)) * stage.getWidth(), 0.03f * stage.getHeight());
         turnButton.setWidth(0.1f * stage.getWidth());
         turnButton.setHeight(0.36f * stage.getHeight());
@@ -79,6 +80,8 @@ public class GameScreen implements Screen {
     void loadTextures()
     {
         backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
+        turnButtonTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+
     }
 
     void registerListeners()

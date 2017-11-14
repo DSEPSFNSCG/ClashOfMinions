@@ -30,9 +30,9 @@ public class SliderNode extends Actor {
         this.type = type;
         sliderSteps = type.steps();
 
-        backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
-        sliderFillTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
-        sliderHandle = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+        sliderFillTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+        sliderHandle = new Texture(Gdx.files.internal("Button-Menu.png"));
 
         addListener(new InputListener() {
 

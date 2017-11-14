@@ -6,8 +6,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mygdx.game.Nodes.ButtonNode;
 
@@ -28,15 +30,28 @@ public class SettingsScreen implements Screen {
 
         stage = new Stage();
 
+        MenuBackgroundNode bg = new MenuBackgroundNode();
+        bg.setWidth(stage.getWidth());
+        bg.setHeight(stage.getHeight());
+        stage.addActor(bg);
+
         table = new Table();
         table.setFillParent(true);
         //table.setDebug(true);
         stage.addActor(table);
 
-        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
-        backButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
+        backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
+        TextField textField = new TextField("", game.skin);
+        Label label = new Label("Your name:", game.skin);
+        label.setColor(0, 0, 0, 1);
+
+        table.add(label).padBottom(10);
+        table.row();
+        table.add(textField).padBottom(UIConstants.menuButtonHeight * stage.getHeight());;
+        table.row();
         table.add(backButton);
 
         backButton.addListener(new ClickListener()

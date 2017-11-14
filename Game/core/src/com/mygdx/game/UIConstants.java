@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class UIConstants {
     public static final float menuButtonHeight = 0.15f;
-    public static final float menuButtonWidth = 0.3f;
+    public static final float menuButtonWidth = 2.5668f * menuButtonHeight;
 
     public static final float gameLowerPadding = 0.03f;
 
