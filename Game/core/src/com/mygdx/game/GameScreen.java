@@ -42,31 +42,41 @@ public class GameScreen implements Screen {
         this.game = game;
         stage = new Stage();
 
-        setupInterface();
+        loadTextures();
+        setupBackground();
         setupBattleField();
+        setupInterface();
 
         Gdx.input.setInputProcessor(stage);
     }
 
+    void setupBackground()
+    {
+        GameBackgroundNode bg = new GameBackgroundNode();
+        bg.setWidth(stage.getWidth());
+        bg.setHeight(stage.getHeight());
+        stage.addActor(bg);
+
+        stage.addActor(bg);
+    }
+
     void setupInterface()
     {
-        loadTextures();
-
         quitButton = new ButtonNode(turnButtonTexture);
         quitButton.setHeight(0.075f * stage.getHeight());
         quitButton.setWidth(quitButton.getHeight());
         quitButton.setPosition(stage.getWidth() - quitButton.getWidth() - 10, stage.getHeight() - quitButton.getHeight() - 10);
 
         turnButton = new ButtonNode(turnButtonTexture);
-        turnButton.setPosition((1 - (0.1f + 1f/30f)) * stage.getWidth(), 0.03f * stage.getHeight());
-        turnButton.setWidth(0.1f * stage.getWidth());
-        turnButton.setHeight(0.36f * stage.getHeight());
+        turnButton.setPosition(UIConstants.turnButtonPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
+        turnButton.setWidth(UIConstants.turnButtonWidth * stage.getWidth());
+        turnButton.setHeight(UIConstants.turnButtonHeight * stage.getHeight());
 
-        manaBarNode = new ManaBarNode(100);
+        manaBarNode = new ManaBarNode(5);
         manaBarNode.setPosition(UIConstants.manaBarPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
         manaBarNode.setWidth(UIConstants.manaBarWidth * stage.getWidth());
         manaBarNode.setHeight(UIConstants.manaBarHeight * stage.getHeight());
-        manaBarNode.actualStep = 100;
+        manaBarNode.actualStep = 5;
 
         stage.addActor(manaBarNode);
         stage.addActor(quitButton);
@@ -144,7 +154,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 1, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.act(delta);

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.mygdx.game.UIConstants;
 
 /**
  * Created by greensn on 08.11.17.
@@ -30,8 +31,8 @@ public class SliderNode extends Actor {
         this.type = type;
         sliderSteps = type.steps();
 
-        backgroundTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
-        sliderFillTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Slider.png"));
+        sliderFillTexture = new Texture(Gdx.files.internal("Slider-Fill.png"));
         sliderHandle = new Texture(Gdx.files.internal("Button-Menu.png"));
 
         addListener(new InputListener() {
@@ -63,9 +64,13 @@ public class SliderNode extends Actor {
          float h = getHeight()/(sliderSteps-1);
          float sliderHeight = 0.1f*getHeight();
 
-         batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
          batch.draw(sliderFillTexture, getX(), getY(), getWidth(), h * actualStep);
-         batch.draw(sliderHandle, getX(), getY() - sliderHeight/2 + h * actualStep, getWidth(), sliderHeight);
+         batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
+         //batch.draw(sliderHandle, getX(), getY() - sliderHeight/2 + h * actualStep, getWidth(), sliderHeight);
+
+         UIConstants.font.draw(batch, "" + type.valueForStep(actualStep), getX(), getY() - sliderHeight/2 + h * actualStep);
+         UIConstants.font.draw(batch, "" + type, getX(), getY());
+
      }
 
      void draggedTo(float x, float y)
