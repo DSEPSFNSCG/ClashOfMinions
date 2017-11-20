@@ -23,8 +23,8 @@ public class ManaBarNode extends Actor {
     {
         sliderSteps = steps;
 
-        backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
-        sliderFillTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Slider.png"));
+        sliderFillTexture = new Texture(Gdx.files.internal("Slider-Fill.png"));
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ManaBarNode extends Actor {
         float h = getHeight()/(sliderSteps);
         float sliderHeight = 0.1f*getHeight();
 
-        batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
         batch.draw(sliderFillTexture, getX(), getY(), getWidth(), h * actualStep);
+        batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
     }
 }

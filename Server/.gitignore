@@ -2,3 +2,6 @@ result
 *.hi
 *.o
 Main
+*.*~
+TAGS
+\#*\#

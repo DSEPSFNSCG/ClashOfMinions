@@ -21,10 +21,14 @@ import com.mygdx.game.UIConstants;
 
 public class BattleField extends Group {
 
-    Texture backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
+    Texture backgroundTexture = new Texture(Gdx.files.internal("Battlefield.png"));
     public BattleFieldLogic battleFieldLogic;
 
     public MinionNode floatingMinion;
+
+    float tileWidth;
+    float tileHeight;
+
     GameScreen game;
 
     public BattleField(GameScreen game)
@@ -35,9 +39,12 @@ public class BattleField extends Group {
 
     public void setup()
     {
+        tileHeight = getHeight()/UIConstants.battleFieldTilesVertical;
+        tileWidth = getWidth()/UIConstants.battleFieldTilesHorizontal;
+
         Image bg = new Image(backgroundTexture);
-        bg.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal * (UIConstants.battleFieldTilesHorizontal + 2));
-        bg.setHeight(getHeight()/UIConstants.battleFieldTilesHorizontal * (UIConstants.battleFieldTilesHorizontal + 2));
+        bg.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal * (UIConstants.battleFieldTilesHorizontal + 4));
+        bg.setHeight(getHeight()/UIConstants.battleFieldTilesHorizontal * (UIConstants.battleFieldTilesHorizontal + 4));
         bg.setPosition(-(bg.getWidth() - getWidth())/2, -(bg.getHeight() - getHeight())/2);
 
         addActor(bg);
@@ -46,8 +53,7 @@ public class BattleField extends Group {
 
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                draggedTo(x, y);
-                return true;
+                return draggedTo(x, y);
             }
 
             @Override
@@ -65,13 +71,14 @@ public class BattleField extends Group {
         });
     }
 
-    void draggedTo(float x, float y)
+    Boolean draggedTo(float x, float y)
     {
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
-        if (coord.x >= 4 && battleFieldLogic.isLeftPlayerTurn) return;
-        if (coord.x <= 5 && !battleFieldLogic.isLeftPlayerTurn) return;
+        if (coord.x == -1 || coord.y == -1) return false;
+        if (coord.x >= 4 && battleFieldLogic.isLeftPlayerTurn) return false;
+        if (coord.x <= 5 && !battleFieldLogic.isLeftPlayerTurn) return false;
 
-        if (battleFieldLogic.getMinionNode(coord.x, coord.y) != null) return;
+        if (battleFieldLogic.getMinionNode(coord.x, coord.y) != null) return false;
 
         if (floatingMinion == null) {
             floatingMinion = new MinionNode(battleFieldLogic.isLeftPlayerTurn); //only for left side player so far
@@ -86,19 +93,20 @@ public class BattleField extends Group {
         floatingMinion.setPosition(newPosition.x, newPosition.y);
         floatingMinion.minion.xPos = coord.x;
         floatingMinion.minion.yPos = coord.y;
+        return true;
     }
 
     GridPoint2 positionToCoordinates(Vector2 pos)
     {
-        float h = getHeight()/UIConstants.battleFieldTilesVertical;
-        float w = getWidth()/UIConstants.battleFieldTilesHorizontal;
+        float h = tileHeight;
+        float w = tileWidth;
 
         int x = (int)Math.floor(pos.x/w);
-        if (x < 0) x = 0;
-        if (x > UIConstants.battleFieldTilesHorizontal-1) x = UIConstants.battleFieldTilesHorizontal-1;
+        if (x < 0) x = -1;
+        if (x > UIConstants.battleFieldTilesHorizontal-1) x = -1;
         int y = (int)Math.floor(pos.y/h);
-        if (y < 0) y = 0;
-        if (y > UIConstants.battleFieldTilesVertical-1) y = UIConstants.battleFieldTilesVertical-1;
+        if (y < 0) y = -1;
+        if (y > UIConstants.battleFieldTilesVertical-1) y = -1;
 
         return new GridPoint2(x, y);
     }
@@ -132,7 +140,8 @@ public class BattleField extends Group {
         }
 
         float moveDuration = runMoveAnimations(0);
-        float attackDuration = runAttackAnimations(moveDuration);
+        float healDuration = runHealAnimations(moveDuration);
+        float attackDuration = runAttackAnimations(moveDuration + healDuration);
     }
 
     float runMoveAnimations(float delay)
@@ -147,30 +156,103 @@ public class BattleField extends Group {
         return duration;
     }
 
+    float runHealAnimations(float delay)
+    {
+        float duration = 0.5f;
+        float sDelay = 0f;
+        for (BattleFieldLogic.Event event : battleFieldLogic.minionHeals)
+        {
+            final MinionNode n1 = event.src;
+            for (int i = 0; i < event.targets.size(); i++) {
+                final MinionNode n2 = event.targets.get(i);
+                healAnimation(
+                        new GridPoint2(n1.minion.xPos, n1.minion.yPos),
+                        new GridPoint2(n2.minion.xPos, n2.minion.yPos),
+                        n2,
+                        event.value,
+                        delay + sDelay,
+                        duration);
+            }
+            sDelay += duration;
+        }
+        return sDelay;
+    }
+
     float runAttackAnimations(float delay)
     {
         float duration = 0.5f;
         float sDelay = 0f;
-        for (MinionNode[] pair : battleFieldLogic.minionAttacks)
+        for (BattleFieldLogic.Event event : battleFieldLogic.minionAttacks)
         {
-            final MinionNode n1 = pair[0];
-            final MinionNode n2 = pair[1];
-            Vector2 p1 = coordinatesToPosition(new GridPoint2(n1.minion.xPos, n1.minion.yPos));
-            Vector2 p2 = coordinatesToPosition(new GridPoint2(n2.minion.xPos, n2.minion.yPos));
-            n1.addAction(Actions.sequence(
-                    Actions.delay(delay + sDelay),
-                    Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
-                    Actions.run(new Runnable() {@Override public void run() {n2.updateHealth();}}),
-                    Actions.moveTo(p1.x, p1.y, duration * 0.6f, Interpolation.elasticOut)));
-            if (n2.minion.getAttribute("Health") <= 0)
-            {
-                n2.addAction(Actions.sequence(
-                        Actions.delay(0.95f),
-                        Actions.fadeOut(0.2f),
-                        Actions.removeActor()));
+            final MinionNode n1 = event.src;
+            for (int i = 0; i < event.targets.size(); i++) {
+                final MinionNode n2 = event.targets.get(i);
+                final boolean lethal = event.lethal.get(i);
+                shootProjectile(
+                        new GridPoint2(n1.minion.xPos, n1.minion.yPos),
+                        new GridPoint2(n2.minion.xPos, n2.minion.yPos),
+                        n2,
+                        event.value,
+                        delay + sDelay,
+                        duration);
+
+                if (lethal) {
+                    n2.addAction(Actions.sequence(
+                            Actions.delay(delay + sDelay + duration),
+                            Actions.fadeOut(0.2f),
+                            Actions.removeActor()));
+                }
             }
             sDelay += duration;
         }
-        return duration;
+        return sDelay;
+    }
+
+    void shootProjectile(GridPoint2 from, GridPoint2 to, final MinionNode targetMinion, final int damage, float delay, float duration)
+    {
+        Vector2 p1 = coordinatesToPosition(from);
+        Vector2 p2 = coordinatesToPosition(to);
+
+        Projectile projectile = new Projectile("Projectile.png");
+        projectile.setPosition(p1.x, p1.y);
+        projectile.setWidth(tileWidth);
+        projectile.setHeight(tileHeight);
+        addActor(projectile);
+        projectile.setVisible(false);
+        projectile.addAction(Actions.sequence(
+                Actions.delay(delay),
+                Actions.show(),
+                Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        targetMinion.setHealth(targetMinion.health-damage);
+                    }
+                }),
+                Actions.removeActor()));
+    }
+
+    void healAnimation(GridPoint2 from, GridPoint2 to, final MinionNode targetMinion, final int health, float delay, float duration)
+    {
+        Vector2 p1 = coordinatesToPosition(from);
+        Vector2 p2 = coordinatesToPosition(to);
+
+        Projectile projectile = new Projectile("Heart.png");
+        projectile.setPosition(p1.x, p1.y);
+        projectile.setWidth(tileWidth);
+        projectile.setHeight(tileHeight);
+        addActor(projectile);
+        projectile.setVisible(false);
+        projectile.addAction(Actions.sequence(
+                Actions.delay(delay),
+                Actions.show(),
+                Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        targetMinion.setHealth(targetMinion.health+health);
+                    }
+                }),
+                Actions.removeActor()));
     }
 }

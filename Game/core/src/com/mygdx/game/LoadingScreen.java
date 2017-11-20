@@ -30,14 +30,19 @@ public class LoadingScreen implements Screen {
 
         stage = new Stage();
 
+        MenuBackgroundNode bg = new MenuBackgroundNode();
+        bg.setWidth(stage.getWidth());
+        bg.setHeight(stage.getHeight());
+        stage.addActor(bg);
+
         table = new Table();
         table.setFillParent(true);
         //table.setDebug(true);
         stage.addActor(table);
 
-        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
-        backButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
+        backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
 
         table.add(backButton);

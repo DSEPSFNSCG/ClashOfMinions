@@ -1,153 +1,106 @@
-{-# LANGUAGE DeriveGeneric #-}
-
-import System.Environment (getArgs)
-import System.IO (
-  IOMode( ReadWriteMode ),
-  hSetBuffering,
-  hPutStrLn,
-  hGetLine,
-  BufferMode ( LineBuffering ),
-  Handle)
-import qualified Network as N
-import qualified Network.Socket as NS
-import Network.Simple.TCP (
-  HostPreference( HostAny ))
-import GHC.Generics
-import Data.Aeson
-import Data.Aeson.Types
-import qualified Data.ByteString as BS
-import Data.ByteString.Lazy (fromStrict, toStrict)
-import Control.Concurrent (forkIO)
-
-type State = Int
-
-customOptions = defaultOptions {
-  sumEncoding = defaultTaggedObject {
-    tagFieldName = "type"
-  }
-}
-
-data Request =
-  Log {
-    message :: String
-  } |
-  Test {
-    hello :: String
-  }
-  | GetState
-  deriving (Generic, Show)
-
-instance ToJSON Request where
-  toEncoding = genericToEncoding customOptions
-instance FromJSON Request where
-  parseJSON = genericParseJSON customOptions
-
-data Reply =
-  ErrorReply {
-    errorMessage :: String
-  }
-  | ReturnState {
-    returnState :: State
-  }
-  deriving (Generic, Show)
-
-instance ToJSON Reply where
-  toEncoding = genericToEncoding customOptions
-instance FromJSON Reply where
-  parseJSON = genericParseJSON customOptions
+module Main where
 
 
-data PlayerState = Waiting
-                 deriving (Show)
+import           CardGame.Game
+import           CardGame.Types
 
-data Player = MkPlayer {
-  handle :: Handle,
-  address :: NS.SockAddr,
-  state :: PlayerState
-}
+import qualified Control.Concurrent as C
+import           Data.Maybe         (fromMaybe, listToMaybe)
+import qualified Network            as N
+import qualified Network.Socket     as NS
+import           System.Environment (getArgs)
+import           System.IO          (BufferMode (LineBuffering),
+                                     IOMode (ReadWriteMode), hSetBuffering,
+                                     stdout)
+import           Text.Read          (readMaybe)
 
-tell :: Player -> String -> IO ()
-tell player = hPutStrLn (handle player)
 
-ask :: Player -> IO String
-ask player = hGetLine (handle player)
+data ServerState = MkServerState { serverSocket  :: NS.Socket
+                                 , games         :: [Game]
+                                 , clientChannel :: ClientChannel
+                                 , connections   :: ServerConnectionState
+                                 , nextClientId  :: Int
+                                 }
 
-main = do
-  args <- getArgs
-  let port = fromIntegral (read $ head args :: Int)
-  socket <- N.listenOn $ N.PortNumber port
-  putStrLn $ "Listening on port " ++ show port ++ ", waiting for players"
-  waitFirstPlayer socket
-
-data Game = MkGame
-  { p1 :: Player
-  , p2 :: Player
-  , gamestate :: () }
-
-gameStep :: Game -> IO Game
-gameStep game@(MkGame { p1=p1, p2=p2, gamestate=gamestate }) = do
-  l1 <- ask p1
-  tell p2 l1
-  l2 <- ask p2
-  tell p1 l2
-  gameStep game
-
-runGame :: Player -> Player -> IO ()
-runGame a b = do
-  let game = MkGame {
-    p1 = a,
-    p2 = b,
-    gamestate = ()
-  }
-  tell a "Hi, you're player A"
-  tell b "Hi, you're player B"
-  gameStep game
-  return ()
-
-acceptConnection socket = do
-  (clientSocket, addr) <- NS.accept socket
+acceptConnection :: Int -> ClientChannel -> NS.Socket -> IO ()
+acceptConnection nextClientId chan serverSocket = do
+  (clientSocket, address) <- NS.accept serverSocket
   handle <- NS.socketToHandle clientSocket ReadWriteMode
   hSetBuffering handle LineBuffering
-  return (handle, addr)
 
-waitFirstPlayer socket = do
-  (handle, addr) <- acceptConnection socket
-  let firstPlayer = MkPlayer {
-      handle = handle
-    , address = addr
-    , state = Waiting }
-  putStrLn $ "First player connected (" ++ show (address firstPlayer) ++ ")"
-  tell firstPlayer $ "Connected, waiting for player 2"
-  waitSecondPlayer firstPlayer socket
+  let client = MkClient { clientId = nextClientId
+                        , clientHandle = handle
+                        , clientAddress = address }
+  putStrLn $ "New client connected: " ++ show client
+  C.writeChan chan (client, Connect)
 
-waitSecondPlayer firstPlayer socket = do
-  (handle, addr) <- acceptConnection socket
-  let secondPlayer = MkPlayer { handle = handle
-    , address = addr
-    , state = Waiting }
-  putStrLn $ "Second player connected (" ++ show (address secondPlayer) ++ ")"
-  tell secondPlayer $ "Connected"
-  forkIO $ runGame firstPlayer secondPlayer
-  waitFirstPlayer socket
+acceptNext :: ServerState -> IO ServerState
+acceptNext state@(MkServerState { nextClientId = nextClientId }) = do
+  _ <- C.forkIO $ acceptConnection nextClientId (clientChannel state) (serverSocket state)
+  return $ state { nextClientId = nextClientId + 1 }
+
+data ServerConnectionState = ZeroConnections
+                           | OneConnection Client
+                           deriving (Show)
+
+serverTrans :: ServerState -> (Client, ClientMessage) -> IO ServerState
+serverTrans state (client, Connect) = do
+  _ <- C.forkIO $ readClient client (clientChannel state)
+  newState <- case connections state of
+    ZeroConnections -> do
+      return $ state { connections = OneConnection client
+                     , nextClientId = (nextClientId state) + 1 }
+    OneConnection client' -> do
+      let gameId = length (games state)
+      game <- newGame gameId client client' (clientChannel state)
+      freshChannel <- C.newChan
+      return $ state { connections = ZeroConnections
+                     , clientChannel = freshChannel
+                     , games = game:(games state)
+                     , nextClientId = (nextClientId state) + 1 }
+  acceptNext newState -- accept another connection
+serverTrans state@(MkServerState { connections = ZeroConnections }) (_, Disconnect) = do
+  putStrLn "[SERVERSTATE] Possible bug: Somebody not in the queue disconnected!"
+  return state
+serverTrans state@(MkServerState { connections = OneConnection client1 }) (client2, Disconnect) =
+  if (client1 == client2)
+  then do
+    putStrLn "[SERVERSTATE] Somebody disconnected, queue empty"
+    return $ state { connections = ZeroConnections }
+  else do
+    putStrLn "[SERVERSTATE] Possible bug: Somebody not in the queue disconnected!"
+    return state
+serverTrans state (client, RequestT _) = do
+  clientSend client $ ErrorReply { errorMessage = "Game not started yet" }
+  return state
+
+defaultPort :: NS.PortNumber
+defaultPort = 8081
+
+-- Gets the port number as either the first CLI argument or the default
+getPort :: IO N.PortID
+getPort = do
+  args <- getArgs
+  return $ N.PortNumber $ fromMaybe defaultPort $ listToMaybe args >>= readMaybe
 
 
+main :: IO ()
+main = do
+  -- Apparently required to get instant output with systemd
+  hSetBuffering stdout LineBuffering
 
-  --handle <- NS.socketToHandle clientSocket ReadWriteMode
-  --hSetBuffering handle LineBuffering
+  port <- getPort
+  serverSocket <- N.listenOn $ port
+  putStrLn $ "Listening on port " ++ show port ++ ", waiting for players"
 
-handleClient state handle = do
-  strict <- BS.hGetLine handle
-  case decode $ fromStrict strict :: Maybe Request of
-    Nothing -> do
-      putStrLn "invalid request"
-      handleClient state handle
-    Just message -> do
-      let (reply, newstate) = handleRequest state message
-      BS.hPutStrLn handle $ toStrict (encode reply)
-      handleClient newstate handle
+  chan <- C.newChan
+  let initialState = MkServerState serverSocket [] chan ZeroConnections 0
+  acceptNext initialState >>= moveOverStates
 
-handleRequest :: State -> Request -> (Reply, State)
-handleRequest state (Log { message = message }) =
-  (ErrorReply { errorMessage = "hi" }, state)
-handleRequest state GetState = (ReturnState { returnState = state }, state)
+moveOverStates :: ServerState -> IO ()
+moveOverStates state = do
+  msg <- C.readChan (clientChannel state)
+  newState <- serverTrans state msg
+  moveOverStates newState
+
 

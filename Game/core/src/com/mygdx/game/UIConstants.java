@@ -8,15 +8,19 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class UIConstants {
     public static final float menuButtonHeight = 0.15f;
-    public static final float menuButtonWidth = 0.3f;
+    public static final float menuButtonWidth = 2.5668f * menuButtonHeight;
 
     public static final float gameLowerPadding = 0.03f;
 
     public static final float sliderGroupWidth = 0.75f;
-    public static final float sliderGroupHeight = 0.36f;
+    public static final float sliderGroupHeight = 0.28f;
+
+    public static final float turnButtonPositionX = 1 - (0.1f + 1f/30f);
+    public static final float turnButtonWidth = 0.1f;
+    public static final float turnButtonHeight = sliderGroupHeight;
 
     public static final float manaBarPositionX = 0.8f;
-    public static final float manaBarHeight = 0.36f;
+    public static final float manaBarHeight = sliderGroupHeight;
     public static final float manaBarWidth = 0.05f;
 
     public static final int battleFieldTilesHorizontal = 10;

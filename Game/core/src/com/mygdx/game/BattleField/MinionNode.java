@@ -39,6 +39,11 @@ public class MinionNode extends Actor {
 
     public void updateHealth()
     {
-        health = minion.getAttribute("Health");
+        this.health = minion.getAttribute("Health");
+    }
+
+    public void setHealth(int health)
+    {
+        this.health = health;
     }
 }

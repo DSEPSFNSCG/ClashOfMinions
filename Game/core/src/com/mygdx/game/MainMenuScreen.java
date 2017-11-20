@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mygdx.game.Nodes.ButtonNode;
+
+import java.awt.Menu;
 
 import javax.smartcardio.Card;
 
@@ -28,24 +31,32 @@ public class MainMenuScreen implements Screen {
     Stage stage;
     Table table;
 
+    Texture bgTexture;
+
     MainMenuScreen(final CardGame game)
     {
         this.game = game;
 
         stage = new Stage();
 
+
+        MenuBackgroundNode bg = new MenuBackgroundNode();
+        bg.setWidth(stage.getWidth());
+        bg.setHeight(stage.getHeight());
+        stage.addActor(bg);
+
         table = new Table();
         table.setFillParent(true);
         //table.setDebug(true);
         stage.addActor(table);
 
-        ButtonNode playButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        ButtonNode playButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Play.png")));
         playButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
-        playButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
+        playButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
-        ButtonNode settingsButton = new ButtonNode(new Texture(Gdx.files.internal("BattlefieldBackground.png")));
+        ButtonNode settingsButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Settings.png")));
         settingsButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
-        settingsButton.setWidth(UIConstants.menuButtonWidth * stage.getWidth());
+        settingsButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
         table.add(playButton).padBottom(50);
         table.row();

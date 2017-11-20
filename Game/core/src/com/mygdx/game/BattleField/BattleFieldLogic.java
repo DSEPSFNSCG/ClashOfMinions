@@ -308,6 +308,7 @@ public class BattleFieldLogic {
 												targetm.setAttribute("Health", targetm.getAttribute("Health") + shield);
 										}
 								}
+								atkEvent.targets.add(targetn);
 								if(targetm.getAttribute("Health")<=0){
 										leftPlayerMinions.remove(targetn);
 										rightPlayerMinions.remove(targetn);
