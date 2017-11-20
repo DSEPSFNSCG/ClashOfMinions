@@ -225,7 +225,7 @@ public class BattleFieldLogic {
 						ArrayList<MinionNode> buffTargets = getInBoostRange(n);
 						if(buffTargets.size() == 0) continue;
 						healing = (int)Math.ceil((double)healing/buffTargets.size());
-						Event healEvent = new Event(n,false, buffTargets.size(),healing);
+						Event healEvent = new Event(n,false, buffTargets.size(), healing);
 						for (MinionNode target : buffTargets) {
 								Minion targetm = target.minion;
 								healEvent.targets.add(target);

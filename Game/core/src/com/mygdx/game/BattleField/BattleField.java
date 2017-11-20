@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.mygdx.game.GameScreen;
 import com.mygdx.game.UIConstants;
 
@@ -68,6 +70,21 @@ public class BattleField extends Group {
                 draggedTo(x, y);
             }
 
+        });
+
+        addListener(new ActorGestureListener()
+        {
+            @Override
+            public void tap(InputEvent event, float x, float y, int count, int button) {
+                System.out.println("Tapped " + x + " " + y);
+                GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
+                MinionNode minionNode = battleFieldLogic.getMinionNode(coord.x, coord.y);
+
+                if (minionNode != null)
+                {
+                    showPopUp(minionNode);
+                }
+            }
         });
     }
 
@@ -146,6 +163,8 @@ public class BattleField extends Group {
 
     float runMoveAnimations(float delay)
     {
+        removePopUp();
+
         float duration = 0.5f;
         for (MinionNode node : battleFieldLogic.movedMinions)
         {
@@ -219,10 +238,16 @@ public class BattleField extends Group {
         projectile.setHeight(tileHeight);
         addActor(projectile);
         projectile.setVisible(false);
+        projectile.setScale(0, 0);
         projectile.addAction(Actions.sequence(
                 Actions.delay(delay),
                 Actions.show(),
-                Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
+                Actions.parallel(
+                        Actions.moveTo(p2.x, p2.y, duration * 1.0f, Interpolation.smooth),
+                        Actions.sequence(
+                                Actions.scaleTo(2, 2, duration * 0.5f, Interpolation.pow2Out),
+                                Actions.scaleTo(0, 0, duration * 0.5f, Interpolation.pow2In))
+                        ),
                 Actions.run(new Runnable() {
                     @Override
                     public void run() {
@@ -246,13 +271,44 @@ public class BattleField extends Group {
         projectile.addAction(Actions.sequence(
                 Actions.delay(delay),
                 Actions.show(),
-                Actions.moveTo(p2.x, p2.y, duration * 0.4f, Interpolation.pow2In),
+                Actions.moveTo(p2.x, p2.y, duration * 1.0f, Interpolation.smooth),
                 Actions.run(new Runnable() {
                     @Override
                     public void run() {
                         targetMinion.setHealth(targetMinion.health+health);
                     }
                 }),
+                Actions.parallel(
+                        Actions.scaleTo(3f, 3f, 1f, Interpolation.pow2In),
+                        Actions.fadeOut(1f, Interpolation.pow2In)
+                        ),
                 Actions.removeActor()));
+    }
+
+    DetailPopUpNode visiblePopUp;
+
+    void showPopUp(MinionNode minionNode)
+    {
+        if (visiblePopUp != null && visiblePopUp.minionNode == minionNode)
+        {
+            removePopUp();
+            return;
+        }
+        removePopUp();
+
+        Float x = getX() + minionNode.getX() + minionNode.getWidth();
+        Float y = getY() + minionNode.getY() - minionNode.getHeight();
+        visiblePopUp = new DetailPopUpNode(minionNode, tileWidth * 2, tileHeight * 3);
+        visiblePopUp.setPosition(x, y);
+        getStage().addActor(visiblePopUp);
+    }
+
+    void removePopUp()
+    {
+        if (visiblePopUp != null)
+        {
+            visiblePopUp.remove();
+            visiblePopUp = null;
+        }
     }
 }

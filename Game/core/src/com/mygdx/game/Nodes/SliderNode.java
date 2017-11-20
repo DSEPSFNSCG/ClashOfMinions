@@ -3,10 +3,14 @@ package com.mygdx.game.Nodes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.UIConstants;
 
 /**
@@ -34,6 +38,18 @@ public class SliderNode extends Actor {
         backgroundTexture = new Texture(Gdx.files.internal("Slider.png"));
         sliderFillTexture = new Texture(Gdx.files.internal("Slider-Fill.png"));
         sliderHandle = new Texture(Gdx.files.internal("Button-Menu.png"));
+    }
+
+    public void setup()
+    {
+//        regions = new TextureRegion[sliderSteps];
+//        for (int i = 0; i < sliderSteps; i++)
+//        {
+//            TextureRegion r = new TextureRegion(sliderFillTexture, 0, 0, backgroundTexture.getWidth(), backgroundTexture.getHeight()/(sliderSteps-1) * i);
+//            regions[i] = r;
+//        }
+
+        TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(sliderFillTexture));
 
         addListener(new InputListener() {
 
