@@ -16,7 +16,7 @@ public class MinionNode extends Actor {
 
     Texture minionTexture;
     int health;
-
+  
     public MinionNode(boolean isLeftPlayer){
         minion = new Minion(isLeftPlayer);
 

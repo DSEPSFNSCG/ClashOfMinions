@@ -15,7 +15,10 @@ public class BattleFieldLogic {
 		public final int width;
 		public final int height;
 		public final MinionNode[][] field;
-		public boolean isLeftPlayerTurn = true;
+    /**
+     *
+     */
+    public boolean isLeftPlayerTurn = true;
 		public boolean gameOver = false;
 
 		public final ArrayList<MinionNode> leftPlayerMinions = new ArrayList<MinionNode>();
@@ -90,7 +93,7 @@ public class BattleFieldLogic {
 		}
 
 		/**
-		 * Used to perform one turn of movement. Do not call this method.
+		 * Used to perform one turn of movement. Call after clearing event history lists
 		 * @return returns true if the movement is a winning one.
 		 */
 		public boolean doMovement(){
@@ -187,7 +190,7 @@ public class BattleFieldLogic {
 
 
 		/**
-		 * Used to apply buffs. Do not call this method.
+		 * Used to apply buffs. Call after doMovement()
 		 */
 		public void doBuffs(){
 				ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
@@ -238,7 +241,7 @@ public class BattleFieldLogic {
 
 
 		/**
-		 * Used to perform attacks. Do not call this method.
+		 * Used to perform attacks. Call after doBuffs()
 		 */
 		public void doAttacks(){
 				ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
