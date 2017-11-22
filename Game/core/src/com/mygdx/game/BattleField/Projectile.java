@@ -1,6 +1,7 @@
 package com.mygdx.game.BattleField;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -20,6 +21,13 @@ public class Projectile extends Actor{
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.draw(texture, getX(), getY(), getWidth(), getHeight());
+        Color color = getColor();
+        batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
+
+        float w = getWidth() * getScaleX();
+        float h = getHeight() * getScaleY();
+        batch.draw(texture, getX() - (w - getWidth())/2, getY() - (h - getHeight())/2, w, h);
+
+        batch.setColor(color.r, color.g, color.b, 1f);
     }
 }

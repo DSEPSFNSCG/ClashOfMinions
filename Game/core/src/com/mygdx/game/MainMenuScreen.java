@@ -46,7 +46,10 @@ public class MainMenuScreen implements Screen {
         stage.addActor(bg);
 
         table = new Table();
-        table.setFillParent(true);
+        table.setWidth(stage.getWidth());
+        table.setHeight(stage.getHeight()/2);
+        table.setPosition(0, stage.getHeight()/2);
+        //table.setFillParent(true);
         //table.setDebug(true);
         stage.addActor(table);
 
@@ -55,12 +58,13 @@ public class MainMenuScreen implements Screen {
         playButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
         ButtonNode settingsButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Settings.png")));
-        settingsButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
-        settingsButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
+        settingsButton.setHeight(UIConstants.menuButtonSettingsSize * stage.getHeight());
+        settingsButton.setWidth(UIConstants.menuButtonSettingsSize * stage.getHeight());
+        settingsButton.setPosition(10f, stage.getHeight() - settingsButton.getHeight() - 10f);
 
-        table.add(playButton).padBottom(50);
-        table.row();
-        table.add(settingsButton);
+        table.add(playButton);
+
+        stage.addActor(settingsButton);
 
         playButton.addListener(new ClickListener()
         {

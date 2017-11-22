@@ -229,21 +229,14 @@ public class BattleFieldLogic {
 						if(healing <= 0) continue;
 						ArrayList<MinionNode> buffTargets = getInBoostRange(n);
 						if(buffTargets.size() == 0) continue;
-						int maxHealPerMinion = (int)Math.ceil((double)healing/buffTargets.size());
-						Event healEvent = new Event(n,false, buffTargets.size(),healing);
-            while (healing > 0 && buffTargets.size() > 0) {
-                for (MinionNode target : buffTargets) {
-                    Minion targetm = target.minion;
-                    healEvent.targets.add(target);
-                    int minionHealing = targetm.getAttribute("MaxHealth")-targetm.getAttribute("Health");
-                    minionHealing = Math.min(maxHealPerMinion, minionHealing);
-                    targetm.setAttribute("Health", targetm.getAttribute("Health") + minionHealing);
-                    healEvent.value1.add(targetm.getAttribute("Health"));
-                    healing -= minionHealing;
-                    if(targetm.getAttribute("MaxHealth")==targetm.getAttribute("Health")){
-                        buffTargets.remove(target);
-                    }
-                }
+						healing = (int)Math.ceil((double)healing/buffTargets.size());
+						Event healEvent = new Event(n,false, buffTargets.size(), healing);
+            for (MinionNode target : buffTargets) {
+                Minion targetm = target.minion;
+                healEvent.targets.add(target);
+                targetm.setAttribute("Health", targetm.getAttribute("Health") + healing);
+                if(targetm.getAttribute("Health")>targetm.getAttribute("MaxHealth")) targetm.setAttribute("Health",targetm.getAttribute("MaxHealth"));
+                healEvent.value1.add(targetm.getAttribute("Health"));
             }
             minionHeals.add(healEvent);
 				}

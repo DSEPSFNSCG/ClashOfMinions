@@ -28,6 +28,7 @@ public class GameScreen implements Screen {
     ButtonNode turnButton;
 
     Texture backgroundTexture;
+    Texture pauseButtonTexture;
     Texture turnButtonTexture;
 
     Group sliderGroup;
@@ -62,15 +63,15 @@ public class GameScreen implements Screen {
 
     void setupInterface()
     {
-        quitButton = new ButtonNode(turnButtonTexture);
-        quitButton.setHeight(0.075f * stage.getHeight());
-        quitButton.setWidth(quitButton.getHeight());
-        quitButton.setPosition(stage.getWidth() - quitButton.getWidth() - 10, stage.getHeight() - quitButton.getHeight() - 10);
+        quitButton = new ButtonNode(pauseButtonTexture);
+        quitButton.setHeight(UIConstants.pauseButtonWidth * stage.getWidth());
+        quitButton.setWidth(UIConstants.pauseButtonWidth * stage.getWidth());
+        quitButton.setPosition(UIConstants.pauseButtonPositionX * stage.getWidth(), UIConstants.pauseButtonPositionY * stage.getHeight());
 
         turnButton = new ButtonNode(turnButtonTexture);
-        turnButton.setPosition(UIConstants.turnButtonPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
+        turnButton.setPosition(UIConstants.turnButtonPositionX * stage.getWidth(), UIConstants.turnButtonPositionY * stage.getHeight());
         turnButton.setWidth(UIConstants.turnButtonWidth * stage.getWidth());
-        turnButton.setHeight(UIConstants.turnButtonHeight * stage.getHeight());
+        turnButton.setHeight(UIConstants.turnButtonWidth * stage.getWidth() * 2);
 
         manaBarNode = new ManaBarNode(5);
         manaBarNode.setPosition(UIConstants.manaBarPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
@@ -90,7 +91,8 @@ public class GameScreen implements Screen {
     void loadTextures()
     {
         backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
-        turnButtonTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+        pauseButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Pause.png"));
+        turnButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Turn.png"));
 
     }
 
@@ -122,17 +124,18 @@ public class GameScreen implements Screen {
         sliderGroup = new Group();
         sliderGroup.setWidth(UIConstants.sliderGroupWidth * stage.getWidth());
         sliderGroup.setHeight(UIConstants.sliderGroupHeight * stage.getHeight());
-        sliderGroup.setPosition(1f/30f * stage.getWidth(), 0.03f * stage.getHeight());
+        sliderGroup.setPosition(UIConstants.sliderGroupPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
         stage.addActor(sliderGroup);
 
         for (int i = 0; i < SliderType.numberOfTypes; i++)
         {
             SliderNode slider = new SliderNode(SliderType.values()[i], manaBarNode);
-            slider.setPosition((0.04f + (0.12f * (float)i)) * sliderGroup.getWidth(), 0);
-            slider.setWidth(0.08f * sliderGroup.getWidth());
+            slider.setPosition((((UIConstants.sliderPadding + UIConstants.sliderWidth) * (float)i)) * sliderGroup.getWidth(), 0);
+            slider.setWidth(UIConstants.sliderWidth * sliderGroup.getWidth());
             slider.setHeight(sliderGroup.getHeight());
             sliderGroup.addActor(slider);
             sliders.add(slider);
+            slider.setup();
         }
 
     }
@@ -142,7 +145,7 @@ public class GameScreen implements Screen {
         battleField = new BattleField(this);
         battleField.setHeight(UIConstants.battleFieldHeight * stage.getHeight());
         battleField.setWidth(battleField.getHeight()/UIConstants.battleFieldTilesVertical * UIConstants.battleFieldTilesHorizontal);
-        battleField.setPosition((stage.getWidth()-battleField.getWidth())/2, UIConstants.battleFieldPositionY * stage.getHeight());
+        battleField.setPosition(UIConstants.battleFieldPositionX * stage.getWidth(), UIConstants.battleFieldPositionY * stage.getHeight());
         stage.addActor(battleField);
         battleField.setup();
     }
@@ -154,8 +157,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
 
         stage.act(delta);
         stage.draw();
