@@ -47,14 +47,14 @@ public class DetailPopUpNode extends Group {
 
     void setupTextures()
     {
-        backgroundTexture =  new Texture(Gdx.files.internal("Button-Menu.png"));
+        backgroundTexture =  new Texture(Gdx.files.internal("PopUpBackground.png"));
 
         icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
         icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
+        icons.add(new Texture(Gdx.files.internal("Icon-Sword-Crossed.png")));
+        icons.add(new Texture(Gdx.files.internal("Icon-Healing.png")));
+        icons.add(new Texture(Gdx.files.internal("Icon-AttackRange.png")));
+        icons.add(new Texture(Gdx.files.internal("Icon-HealingRange.png")));
         icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
         icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
     }
@@ -77,7 +77,7 @@ public class DetailPopUpNode extends Group {
         batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
 
         Float borderGapY = getWidth()/2 * 0.3f;
-        Float borderGapX = getWidth()/2 * 0.2f;
+        Float borderGapX = getWidth()/2 * 0.3f;
         Float textGapX = getWidth()/2 * 0.025f;
 
         Float rowHeight = (getHeight()-(5*borderGapY))/4;

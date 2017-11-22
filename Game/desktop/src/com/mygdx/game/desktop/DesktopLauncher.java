@@ -10,6 +10,7 @@ public class DesktopLauncher {
 		config.height = (int) CardGame.HEIGHT;
 		config.width = (int) CardGame.WIDTH;
 		config.resizable = false;
+		config.samples = 3;
 		//config.fullscreen = true;
 		new LwjglApplication(new CardGame(), config);
 	}

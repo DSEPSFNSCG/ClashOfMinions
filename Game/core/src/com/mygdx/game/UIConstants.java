@@ -24,7 +24,6 @@ public class UIConstants {
     public static final float turnButtonPositionX = 0.9f;
     public static final float turnButtonPositionY = 0.5f;
     public static final float turnButtonWidth = 0.08f;
-    public static final float turnButtonHeight = sliderGroupHeight;
 
     public static final float pauseButtonPositionX = 0.9f;
     public static final float pauseButtonPositionY = turnButtonPositionY + sliderGroupHeight + 0.05f;

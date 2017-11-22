@@ -71,7 +71,7 @@ public class GameScreen implements Screen {
         turnButton = new ButtonNode(turnButtonTexture);
         turnButton.setPosition(UIConstants.turnButtonPositionX * stage.getWidth(), UIConstants.turnButtonPositionY * stage.getHeight());
         turnButton.setWidth(UIConstants.turnButtonWidth * stage.getWidth());
-        turnButton.setHeight(UIConstants.turnButtonHeight * stage.getHeight());
+        turnButton.setHeight(UIConstants.turnButtonWidth * stage.getWidth() * 2);
 
         manaBarNode = new ManaBarNode(5);
         manaBarNode.setPosition(UIConstants.manaBarPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
@@ -92,7 +92,7 @@ public class GameScreen implements Screen {
     {
         backgroundTexture = new Texture(Gdx.files.internal("BattlefieldBackground.png"));
         pauseButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Pause.png"));
-        turnButtonTexture = new Texture(Gdx.files.internal("Button-Menu.png"));
+        turnButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Turn.png"));
 
     }
 
@@ -157,8 +157,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
 
         stage.act(delta);
         stage.draw();

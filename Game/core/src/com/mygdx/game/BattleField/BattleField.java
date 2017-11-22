@@ -289,7 +289,7 @@ public class BattleField extends Group {
 
     void showPopUp(MinionNode minionNode)
     {
-        if (visiblePopUp != null && visiblePopUp.minionNode == minionNode)
+        if (visiblePopUp != null && visiblePopUp.hasParent() && visiblePopUp.minionNode == minionNode)
         {
             removePopUp();
             return;
