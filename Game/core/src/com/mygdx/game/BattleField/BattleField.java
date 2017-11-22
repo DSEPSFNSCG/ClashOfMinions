@@ -169,7 +169,7 @@ public class BattleField extends Group {
                         new GridPoint2(n1.minion.xPos, n1.minion.yPos),
                         new GridPoint2(n2.minion.xPos, n2.minion.yPos),
                         n2,
-                        event.value,
+                        event.value1.get(i),
                         delay + sDelay,
                         duration);
             }
@@ -192,9 +192,10 @@ public class BattleField extends Group {
                         new GridPoint2(n1.minion.xPos, n1.minion.yPos),
                         new GridPoint2(n2.minion.xPos, n2.minion.yPos),
                         n2,
-                        event.value,
+                        event.value1.get(i),
                         delay + sDelay,
-                        duration);
+                        duration,
+                        event.value2.get(i));
 
                 if (lethal) {
                     n2.addAction(Actions.sequence(
@@ -208,7 +209,7 @@ public class BattleField extends Group {
         return sDelay;
     }
 
-    void shootProjectile(GridPoint2 from, GridPoint2 to, final MinionNode targetMinion, final int damage, float delay, float duration)
+    void shootProjectile(GridPoint2 from, GridPoint2 to, final MinionNode targetMinion, final int health, float delay, float duration, final int shield)
     {
         Vector2 p1 = coordinatesToPosition(from);
         Vector2 p2 = coordinatesToPosition(to);
@@ -226,7 +227,8 @@ public class BattleField extends Group {
                 Actions.run(new Runnable() {
                     @Override
                     public void run() {
-                        targetMinion.setHealth(targetMinion.health-damage);
+                        targetMinion.setHealth(health);
+                        targetMinion.setShield(shield);
                     }
                 }),
                 Actions.removeActor()));
@@ -250,7 +252,7 @@ public class BattleField extends Group {
                 Actions.run(new Runnable() {
                     @Override
                     public void run() {
-                        targetMinion.setHealth(targetMinion.health+health);
+                        targetMinion.setHealth(health);
                     }
                 }),
                 Actions.removeActor()));

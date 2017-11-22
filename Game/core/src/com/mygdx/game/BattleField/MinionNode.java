@@ -16,7 +16,8 @@ public class MinionNode extends Actor {
 
     Texture minionTexture;
     int health;
-  
+    int shield;
+
     public MinionNode(boolean isLeftPlayer){
         minion = new Minion(isLeftPlayer);
 
@@ -32,7 +33,11 @@ public class MinionNode extends Actor {
         batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
 
         batch.draw(minionTexture, getX(), getY(), getWidth(), getHeight());
+        UIConstants.font.setColor(Color.WHITE);
         UIConstants.font.draw(batch, "" + health, getX(), getY());
+        UIConstants.font.setColor(Color.YELLOW);
+        UIConstants.font.draw(batch, "" + shield, getX(), getY() + 12 );
+        //TODO: Draw shield
 
         batch.setColor(color.r, color.g, color.b, 1f);
     }
@@ -40,10 +45,19 @@ public class MinionNode extends Actor {
     public void updateHealth()
     {
         this.health = minion.getAttribute("Health");
+        this.shield = minion.getAttribute("Shield");
     }
 
+    public void setShield(int shield) {
+        this.shield = shield;
+    }
     public void setHealth(int health)
     {
         this.health = health;
+    }
+
+    @Override
+    public String toString(){
+        return "MinionNode at " +  minion.yPos + ", " + minion.xPos;
     }
 }

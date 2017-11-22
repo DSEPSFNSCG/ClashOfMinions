@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by 2weirdy on 2017-11-10.
@@ -98,11 +99,27 @@ public class BattleFieldLogic {
 		 */
 		public boolean doMovement(){
 				ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
-				final int xMod = isLeftPlayerTurn ? 1 : -1;
+        final int xMod = isLeftPlayerTurn ? 1 : -1;
+        Collections.sort(curMinions, new Comparator<MinionNode>() {
+            @Override
+            public int compare(MinionNode t0, MinionNode t1) {
+                if(t0.minion.xPos<t1.minion.xPos){
+                    return xMod;
+                }
+                    if(t0.minion.xPos>t1.minion.xPos){
+                    return -xMod;
+                }
+                    if(t0.minion.yPos<t1.minion.yPos){
+                    return xMod;
+                }else{
+                    return -xMod;
+                }
+            }
+        });
 				for(MinionNode n:curMinions){
 						Minion m = n.minion;
 						if(field[m.xPos+xMod][m.yPos]==null){
-								int  oldXpos = m.xPos;
+								int oldXpos = m.xPos;
 								int newXPos = m.xPos + xMod;
 								m.xPos = newXPos;
 								field[newXPos][m.yPos] = n;
@@ -115,22 +132,7 @@ public class BattleFieldLogic {
 								}
 						}
 				}
-				Collections.sort(curMinions, new Comparator<MinionNode>() {
-						@Override
-						public int compare(MinionNode t0, MinionNode t1) {
-								if(t0.minion.xPos<t1.minion.xPos){
-										return -xMod;
-								}
-								if(t0.minion.xPos>t1.minion.xPos){
-										return xMod;
-								}
-								if(t0.minion.yPos<t1.minion.yPos){
-								    return -xMod;
-                }else{
-								    return xMod;
-                }
-						}
-				});
+				System.out.println(curMinions);
 				return false;
 		}
 
@@ -227,15 +229,23 @@ public class BattleFieldLogic {
 						if(healing <= 0) continue;
 						ArrayList<MinionNode> buffTargets = getInBoostRange(n);
 						if(buffTargets.size() == 0) continue;
-						healing = (int)Math.ceil((double)healing/buffTargets.size());
+						int maxHealPerMinion = (int)Math.ceil((double)healing/buffTargets.size());
 						Event healEvent = new Event(n,false, buffTargets.size(),healing);
-						for (MinionNode target : buffTargets) {
-								Minion targetm = target.minion;
-								healEvent.targets.add(target);
-								targetm.setAttribute("Health", targetm.getAttribute("Health") + healing);
-								if(targetm.getAttribute("Health")>targetm.getAttribute("MaxHealth")) targetm.setAttribute("Health",targetm.getAttribute("MaxHealth"));
-						}
-						minionHeals.add(healEvent);
+            while (healing > 0 && buffTargets.size() > 0) {
+                for (MinionNode target : buffTargets) {
+                    Minion targetm = target.minion;
+                    healEvent.targets.add(target);
+                    int minionHealing = targetm.getAttribute("MaxHealth")-targetm.getAttribute("Health");
+                    minionHealing = Math.min(maxHealPerMinion, minionHealing);
+                    targetm.setAttribute("Health", targetm.getAttribute("Health") + minionHealing);
+                    healEvent.value1.add(targetm.getAttribute("Health"));
+                    healing -= minionHealing;
+                    if(targetm.getAttribute("MaxHealth")==targetm.getAttribute("Health")){
+                        buffTargets.remove(target);
+                    }
+                }
+            }
+            minionHeals.add(healEvent);
 				}
 		}
 
@@ -317,6 +327,8 @@ public class BattleFieldLogic {
 								}else{
 										atkEvent.lethal.add(false);
 								}
+                atkEvent.value1.add(targetm.getAttribute("Health"));
+								atkEvent.value2.add(targetm.getAttribute("Shield"));
 						}
 						minionAttacks.add(atkEvent);
 				}
@@ -364,20 +376,35 @@ public class BattleFieldLogic {
 				return doGameStep();
 		}
 
-		public static class Event{
-				public MinionNode src;
-				public ArrayList<MinionNode> targets;
-				public int value;
-				public ArrayList<Boolean> lethal;
 
-				public Event(MinionNode src, boolean damage, int size, int value){
-						this.src = src;
-						this.targets = new ArrayList<MinionNode>(size);
-						this.value = value;
-						if(damage){
-								lethal = new ArrayList<Boolean>(size);
-						}
-				}
+  /**
+   * Used to rebuild battlefield from a history of events. Only a list of minions is required.
+   * @param turns
+   */
+  public void retrace(List<MinionNode> turns){
+      for(MinionNode n : turns){
+              addMinionAsTurn(n,n.minion.xPos,n.minion.yPos,n.minion.isLeftPlayer);
+          }
+      }
 
-		}
+      public static class Event{
+          public MinionNode src;
+          public ArrayList<MinionNode> targets;
+          public ArrayList<Integer> value2;
+          public ArrayList<Integer> value1;
+          public int valueBase;
+          public ArrayList<Boolean> lethal;
+
+          public Event(MinionNode src, boolean damage, int size, int value){
+              this.src = src;
+              this.targets = new ArrayList<MinionNode>(size);
+              this.value1 = new ArrayList<Integer>(size);
+              this.valueBase = value;
+              if(damage){
+                  lethal = new ArrayList<Boolean>(size);
+                  value2 = new ArrayList<Integer>(size);
+              }
+          }
+
+      }
 }
