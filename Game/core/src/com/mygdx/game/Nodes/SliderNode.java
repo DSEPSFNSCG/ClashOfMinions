@@ -4,14 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.mygdx.game.GameScreen;
 import com.mygdx.game.UIConstants;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 /**
  * Created by greensn on 08.11.17.
@@ -22,12 +21,14 @@ public class SliderNode extends Actor {
     Texture backgroundTexture;
     Texture sliderFillTexture;
     Texture sliderHandle;
+    Texture iconTexture;
 
     public SliderType type;
     int sliderSteps;
     public int actualStep = 0;
 
     ManaBarNode manaBarNode;
+    public GameScreen gameScreen;
 
     public SliderNode(SliderType type, ManaBarNode manaBar)
     {
@@ -38,6 +39,7 @@ public class SliderNode extends Actor {
         backgroundTexture = new Texture(Gdx.files.internal("Slider.png"));
         sliderFillTexture = new Texture(Gdx.files.internal("Slider-Fill.png"));
         sliderHandle = new Texture(Gdx.files.internal("Button-Menu.png"));
+        iconTexture = new Texture(Gdx.files.internal(type.iconName()));
     }
 
     public void setup()
@@ -77,16 +79,21 @@ public class SliderNode extends Actor {
 
      @Override
      public void draw(Batch batch, float parentAlpha) {
-         float h = getHeight()/(sliderSteps-1);
+         float h = (getHeight() * 0.98f)/(sliderSteps-1);
          float sliderHeight = 0.1f*getHeight();
+
+         float iconSize = getWidth() * 0.5f;
 
          batch.draw(sliderFillTexture, getX(), getY(), getWidth(), h * actualStep);
          batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
+         batch.draw(iconTexture, getX() - getWidth() * 0.05f - iconSize, getY() + iconSize*0.1f, iconSize, iconSize);
          //batch.draw(sliderHandle, getX(), getY() - sliderHeight/2 + h * actualStep, getWidth(), sliderHeight);
 
-         UIConstants.font.draw(batch, "" + type.valueForStep(actualStep), getX(), getY() - sliderHeight/2 + h * actualStep);
-         UIConstants.font.draw(batch, "" + type, getX(), getY());
+         final GlyphLayout layout = new GlyphLayout(UIConstants.font, "" + type.valueForStep(actualStep));
 
+         float yOffset = actualStep == 0 ? getHeight() * 0.2f : 0f;
+
+         UIConstants.font.draw(batch, "" + type.valueForStep(actualStep), getX() + (getWidth() - layout.width)/2, getY() - sliderHeight/2 + yOffset + h * actualStep);
      }
 
      void draggedTo(float x, float y)
@@ -100,6 +107,8 @@ public class SliderNode extends Actor {
 
      void setSteps(int steps)
      {
+         int oldActualStep = actualStep;
+
          manaBarNode.actualStep += actualStep;
 
          int maxPossibleSteps = manaBarNode.actualStep;
@@ -110,6 +119,11 @@ public class SliderNode extends Actor {
          if (actualStep < 0) actualStep = 0;
 
          manaBarNode.actualStep -= actualStep;
+
+         if (oldActualStep != actualStep && gameScreen != null)
+         {
+             gameScreen.updateMinionStats();
+         }
      }
 
      public int getSliderValue()

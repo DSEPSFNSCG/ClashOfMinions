@@ -25,6 +25,8 @@ public class MinionNode extends Actor {
     int health;
     int shield;
 
+    public Boolean isFloating = false;
+
     public MinionNode(boolean isLeftPlayer){
         minion = new Minion(isLeftPlayer);
 
@@ -38,8 +40,8 @@ public class MinionNode extends Actor {
             minionTexture = new Texture(Gdx.files.internal("Minion-Red.png"));
         }
 
-        healthBar = new Texture(Gdx.files.internal("Slider.png"));
-        healthFill = new Texture(Gdx.files.internal("Slider-Fill.png"));
+        healthBar = new Texture(Gdx.files.internal("Slider-Health.png"));
+        healthFill = new Texture(Gdx.files.internal("Slider-Fill-Health.png"));
         shieldFill = new Texture(Gdx.files.internal("Button-Menu.png"));
         sword = new Texture(Gdx.files.internal("Icon-Sword.png"));
         swordFlipped = new Texture(Gdx.files.internal("Icon-Sword-Flipped.png"));
@@ -65,7 +67,6 @@ public class MinionNode extends Actor {
         int maxHealth = minion.getAttribute("MaxHealth");
         Float healthPercentage = ((float)health)/maxHealth;
 
-        int shield = minion.getAttribute("Shield");
         Float shieldPercentage = ((float)shield/2)/maxHealth;
 
         batch.draw(healthFill, healthBarPositionX, healthBarPositionY, healthBarWidth, healthBarHeight*healthPercentage);
@@ -109,7 +110,7 @@ public class MinionNode extends Actor {
         return step;
     }
 
-    public void updateHealth()
+    public void updateStats()
     {
         this.health = minion.getAttribute("Health");
         this.shield = minion.getAttribute("Shield");

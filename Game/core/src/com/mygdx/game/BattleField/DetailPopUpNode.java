@@ -49,14 +49,10 @@ public class DetailPopUpNode extends Group {
     {
         backgroundTexture =  new Texture(Gdx.files.internal("PopUpBackground.png"));
 
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Sword-Crossed.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Healing.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-AttackRange.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-HealingRange.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
-        icons.add(new Texture(Gdx.files.internal("Icon-Heart.png")));
+        for (int i = 0; i < 8; i++)
+        {
+            icons.add(new Texture(Gdx.files.internal(SliderType.values()[i].iconName())));
+        }
     }
 
     void loadValues()

@@ -42,6 +42,22 @@ public enum SliderType
         return 0;
     }
 
+    public String iconName()
+    {
+        switch (this)
+        {
+            case Health: return "Icon-Heart.png";
+            case Shield: return "Icon-Shield.png";
+            case Attack: return "Icon-Sword-Crossed.png";
+            case HealingPower: return "Icon-Healing.png";
+            case AttackRange: return "Icon-AttackRange.png";
+            case HealBuffRange: return "Icon-HealingRange.png";
+            case AttackBoost: return "Icon-AttackBoost.png";
+            case HealBuffBoost: return "Icon-HealingBoost.png";
+        }
+        return "";
+    }
+
     @Override
     public String toString() {
         switch (this)

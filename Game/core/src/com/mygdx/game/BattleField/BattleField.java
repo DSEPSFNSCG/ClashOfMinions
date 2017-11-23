@@ -2,20 +2,21 @@ package com.mygdx.game.BattleField;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.GameScreen;
 import com.mygdx.game.UIConstants;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 /**
  * Created by greensn on 09.11.17.
@@ -24,6 +25,9 @@ import com.mygdx.game.UIConstants;
 public class BattleField extends Group {
 
     Texture backgroundTexture = new Texture(Gdx.files.internal("Battlefield.png"));
+    Texture attackSymbol = new Texture(Gdx.files.internal("Symbol-Attack.png"));
+    Texture healingSymbol = new Texture(Gdx.files.internal("Symbol-Healing.png"));
+
     public BattleFieldLogic battleFieldLogic;
 
     public MinionNode floatingMinion;
@@ -76,7 +80,7 @@ public class BattleField extends Group {
         {
             @Override
             public void tap(InputEvent event, float x, float y, int count, int button) {
-                System.out.println("Tapped " + x + " " + y);
+                //System.out.println("Tapped " + x + " " + y);
                 GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
                 MinionNode minionNode = battleFieldLogic.getMinionNode(coord.x, coord.y);
 
@@ -87,6 +91,82 @@ public class BattleField extends Group {
             }
         });
     }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        super.draw(batch, parentAlpha);
+
+        if (floatingMinion != null)
+        {
+            drawAttackPositions(batch);
+            drawHealingPositions(batch);
+        }
+    }
+
+    void drawAttackPositions(Batch batch)
+    {
+        int xMod = floatingMinion.minion.isLeftPlayer ? 1 : -1;
+        Array<GridPoint2> attackPositions = new Array<GridPoint2>();
+        switch(floatingMinion.minion.getAttribute("AttackRange")){
+            case 3:
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 2 * xMod, floatingMinion.minion.yPos + 1));
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 2 * xMod, floatingMinion.minion.yPos - 1));
+            case 2:
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 0 * xMod, floatingMinion.minion.yPos + 1));
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 0 * xMod, floatingMinion.minion.yPos - 1));
+            case 1:
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 2 * xMod, floatingMinion.minion.yPos + 0));
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 1 * xMod, floatingMinion.minion.yPos + 1));
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 1 * xMod, floatingMinion.minion.yPos - 1));
+            case 0:
+                attackPositions.add(new GridPoint2(floatingMinion.minion.xPos + 1 * xMod, floatingMinion.minion.yPos + 0));
+                break;
+        }
+
+        for (GridPoint2 position:attackPositions)
+        {
+            if (!isCoordInField(position)) continue;
+            Vector2 pos = coordinatesToPosition(position);
+            batch.draw(attackSymbol, getX() + pos.x, getY() + pos.y, tileWidth, tileHeight);
+        }
+    }
+
+    void drawHealingPositions(Batch batch)
+    {
+        int xMod = floatingMinion.minion.isLeftPlayer ? 1 : -1;
+        Array<GridPoint2> healingPositions = new Array<GridPoint2>();
+        switch(floatingMinion.minion.getAttribute("BuffRange")){
+            case 3:
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos - 1 * xMod, floatingMinion.minion.yPos + 1));
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos - 1 * xMod, floatingMinion.minion.yPos + 0));
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos - 1 * xMod, floatingMinion.minion.yPos - 1));
+            case 2:
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos + 1 * xMod, floatingMinion.minion.yPos + 1));
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos + 1 * xMod, floatingMinion.minion.yPos + 0));
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos + 1 * xMod, floatingMinion.minion.yPos - 1));
+            case 1:
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos + 0 * xMod, floatingMinion.minion.yPos + 1));
+                healingPositions.add(new GridPoint2(floatingMinion.minion.xPos + 0 * xMod, floatingMinion.minion.yPos - 1));
+            case 0:
+                break;
+        }
+
+        for (GridPoint2 position:healingPositions)
+        {
+            if (!isCoordInField(position)) continue;
+            Vector2 pos = coordinatesToPosition(position);
+            batch.draw(healingSymbol, getX() + pos.x, getY() + pos.y, tileWidth, tileHeight);
+        }
+    }
+
+    Boolean isCoordInField(GridPoint2 coord)
+    {
+        return !(coord.x < 0 ||
+                coord.x > UIConstants.battleFieldTilesHorizontal-1 ||
+                coord.y < 0 ||
+                coord.y > UIConstants.battleFieldTilesVertical-1);
+    }
+
 
     Boolean draggedTo(float x, float y)
     {
@@ -99,9 +179,11 @@ public class BattleField extends Group {
 
         if (floatingMinion == null) {
             floatingMinion = new MinionNode(battleFieldLogic.isLeftPlayerTurn); //only for left side player so far
+            floatingMinion.isFloating = true;
             floatingMinion.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal);
             floatingMinion.setHeight(getHeight()/UIConstants.battleFieldTilesVertical);
             addActor(floatingMinion);
+            game.updateMinionStats();
         }
 
         //System.out.println("Dragged minion to: " + coord);
@@ -112,6 +194,7 @@ public class BattleField extends Group {
         floatingMinion.minion.yPos = coord.y;
         return true;
     }
+
 
     GridPoint2 positionToCoordinates(Vector2 pos)
     {
@@ -143,7 +226,8 @@ public class BattleField extends Group {
         if (floatingMinion != null)
         {
             gameOver = battleFieldLogic.addMinionAsTurn(floatingMinion, floatingMinion.minion.xPos, floatingMinion.minion.yPos, floatingMinion.minion.isLeftPlayer);
-            floatingMinion.updateHealth();
+            floatingMinion.updateStats();
+            floatingMinion.isFloating = false;
             floatingMinion = null;
         }
         else

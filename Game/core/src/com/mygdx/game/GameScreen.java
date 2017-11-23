@@ -133,6 +133,7 @@ public class GameScreen implements Screen {
             slider.setPosition((((UIConstants.sliderPadding + UIConstants.sliderWidth) * (float)i)) * sliderGroup.getWidth(), 0);
             slider.setWidth(UIConstants.sliderWidth * sliderGroup.getWidth());
             slider.setHeight(sliderGroup.getHeight());
+            slider.gameScreen = this;
             sliderGroup.addActor(slider);
             sliders.add(slider);
             slider.setup();
@@ -196,6 +197,12 @@ public class GameScreen implements Screen {
 
     private void placeAction()
     {
+        updateMinionStats();
+        battleField.placeFloatingMinion();
+    }
+
+    public void updateMinionStats()
+    {
         if (battleField.floatingMinion != null)
         {
             for (SliderNode slider:sliders)
@@ -203,8 +210,8 @@ public class GameScreen implements Screen {
                 battleField.floatingMinion.minion.setAttribute(slider.type.toString(), slider.getSliderValue());
             }
             battleField.floatingMinion.minion.setAttribute("MaxHealth", battleField.floatingMinion.minion.getAttribute("Health"));
+            battleField.floatingMinion.updateStats();
         }
-        battleField.placeFloatingMinion();
     }
 
     public void gameOver()
