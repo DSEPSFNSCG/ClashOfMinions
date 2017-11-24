@@ -30,8 +30,6 @@ main = do
   -- Apparently required to get instant output with systemd
   hSetBuffering stdout LineBuffering
 
-  line <- getLine
-
   port <- getPort
   socket <- N.listenOn $ port
   putStrLn $ "Listening on port " ++ show port ++ ", waiting for players"

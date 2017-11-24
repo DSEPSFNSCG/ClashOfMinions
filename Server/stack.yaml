@@ -67,4 +67,4 @@ extra-package-dbs: []
 
 nix:
   enable: true
-  shell-file: shell.nix
+  shell-file: default.nix
