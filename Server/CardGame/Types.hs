@@ -1,66 +1,67 @@
 {-# LANGUAGE DeriveGeneric #-}
 module CardGame.Types where
 
-import qualified Control.Concurrent    as C
+import qualified Control.Concurrent     as C
+import           Control.Concurrent.STM
 import           Data.Aeson
 import           Data.Aeson.Types
-import qualified Data.ByteString.Char8 as BS
-import           Data.ByteString.Lazy  (fromStrict, toStrict)
+import qualified Data.ByteString.Char8  as BS
+import           Data.ByteString.Lazy   (fromStrict, toStrict)
 import           GHC.Generics
-import qualified Network.Socket        as NS
-import           System.IO             (Handle, hIsEOF)
+import qualified Network.Socket         as NS
+import           System.IO              (Handle, hIsEOF)
 
-type State = Int
 
-customOptions :: Options
-customOptions = defaultOptions {
-  sumEncoding = defaultTaggedObject {
-    tagFieldName = "type"
-  }
-}
+data Game = MkGame
+  { gameId    :: GameID
+  , players   :: (Player, Player)
+  , gamestate :: ()
+  , events    :: TQueue (Client, ClientMessage)}
 
-data Client = MkClient { clientId      :: Int
-                       , clientHandle  :: Handle
-                       , clientAddress :: NS.SockAddr }
-                       deriving (Show)
+data PlayerState = Waiting deriving (Show)
 
-clientSend :: Client -> Reply -> IO ()
-clientSend client reply = BS.hPutStrLn (clientHandle client) $ toStrict $ encode reply
+data Player = MkPlayer {
+  playerHandle :: Handle,
+  playerState  :: PlayerState
+} deriving (Show)
 
-clientRecv :: Client -> IO (Maybe Request)
-clientRecv client = do
-  line <- BS.hGetLine (clientHandle client)
-  return $ decode $ fromStrict line
+data ServerState = MkServerState { games   :: [Game]
+                                 , inQueue :: Maybe Client
+                                 }
 
-data ClientMessage = Connect | RequestT Request | Disconnect deriving (Show)
-type ClientChannel = C.Chan (Client, ClientMessage)
+data ClientState = Unknown
+                 | WaitingNewGame
+                 | InGame Game
 
--- Puts all data from this client to the given channel
-readClient :: Client -> C.Chan (Client, ClientMessage) -> IO ()
-readClient client chan = do
-  isEOF <- hIsEOF (clientHandle client)
-  if isEOF
-    then do
-      putStrLn $ "Client disconnected: " ++ show client
-      C.writeChan chan (client, Disconnect)
-    else do
-      line <- BS.hGetLine (clientHandle client)
-      case decode (fromStrict line) of
-        Nothing -> clientSend client $ ErrorReply { errorMessage = "Invalid request" }
-        Just request -> C.writeChan chan (client, RequestT request)
-      readClient client chan
+data Client = MkClient { clientId     :: Int
+                       , clientHandle :: Handle
+                       , clientState  :: TVar ClientState
+                       }
 
 instance Eq Client where
   c1 == c2 = (clientId c1) == (clientId c2)
 
+data ClientMessage = RequestT Request | Disconnect
+
+type State = Int
+
+class HasHandle a where
+  handle :: a -> Handle
+
+instance HasHandle Client where
+  handle = clientHandle
+instance HasHandle Player where
+  handle = playerHandle
+
+tell :: HasHandle a => a -> Reply -> IO ()
+tell a reply = BS.hPutStrLn (handle a) $ toStrict $ encode reply
+
+
+type ClientChannel = C.Chan (Client, ClientMessage)
+
 type GameID = Int
 
-data Request =
-  Test {
-    hello :: String
-  }
-  | Place
-  | GetState
+data Request = NewGame | Chat { chatMessage :: String }
   deriving (Generic, Show)
 
 
@@ -76,6 +77,12 @@ data Reply =
   }
   deriving (Generic, Show)
 
+customOptions :: Options
+customOptions = defaultOptions {
+  sumEncoding = defaultTaggedObject {
+    tagFieldName = "type"
+  }
+}
 
 instance ToJSON Request where
   toEncoding = genericToEncoding customOptions
