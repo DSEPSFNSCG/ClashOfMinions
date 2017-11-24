@@ -1,10 +1,10 @@
-module CardGame.Game (newGame
-                     , Game
-                     , runGame
-                     ) where
+module Game (newGame
+            , Game
+            , runGame
+            ) where
 
-import           CardGame.Types
 import           Data.Tuple
+import           Types
 
 import           Control.Concurrent      (forkIO)
 import           Control.Concurrent.Chan

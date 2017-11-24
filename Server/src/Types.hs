@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module CardGame.Types where
+module Types where
 
 import qualified Control.Concurrent     as C
 import           Control.Concurrent.STM

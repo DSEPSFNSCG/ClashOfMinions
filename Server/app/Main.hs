@@ -1,8 +1,9 @@
 module Main where
 
+import           Client
+import           Types
 
-import           CardGame.Client
-import           CardGame.Types
+
 import qualified Control.Concurrent     as C
 import           Control.Concurrent.STM
 import           Data.Maybe             (fromMaybe, listToMaybe)
@@ -17,6 +18,7 @@ import           Text.Read              (readMaybe)
 defaultPort :: NS.PortNumber
 defaultPort = 8081
 
+
 -- Gets the port number as either the first CLI argument or the default
 getPort :: IO N.PortID
 getPort = do
@@ -28,6 +30,8 @@ main = do
   -- Apparently required to get instant output with systemd
   hSetBuffering stdout LineBuffering
 
+  line <- getLine
+
   port <- getPort
   socket <- N.listenOn $ port
   putStrLn $ "Listening on port " ++ show port ++ ", waiting for players"
@@ -35,6 +39,9 @@ main = do
   serverState <- atomically $ newTVar $ MkServerState { games = [], inQueue = Nothing }
   acceptConnections serverState socket 0
 
+
+test :: Int -> String
+test i = show i
 
 
 acceptConnections :: TVar ServerState -> NS.Socket -> Int -> IO ()

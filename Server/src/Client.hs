@@ -1,14 +1,16 @@
-module CardGame.Client where
+module Client where
 
-import           CardGame.Game
-import           CardGame.Types
-import qualified Control.Concurrent     as C
+import qualified Control.Concurrent              as C
 import           Control.Concurrent.STM
+import           Control.Monad.Trans.Writer.Lazy (WriterT)
 import           Data.Aeson
-import qualified Data.ByteString.Char8  as BS
-import           Data.ByteString.Lazy   (fromStrict, toStrict)
-import           System.IO              (Handle, hIsEOF)
+import qualified Data.ByteString.Char8           as BS
+import           Data.ByteString.Lazy            (fromStrict, toStrict)
+import           Game
+import           System.IO                       (Handle, hIsEOF)
+import           Types
 
+type ClientMonad a = WriterT String STM a
 
 clog :: Client -> String -> IO ()
 clog client str = do
