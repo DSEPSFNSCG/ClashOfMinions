@@ -41,6 +41,9 @@ public class UIConstants {
     public static final float battleFieldPositionX = 0.075f;
     public static final float battleFieldPositionY = 0.42f;
 
+    public static final float nameTagHeight = 0.045f;
+    public static final float nameTagWidth = 0.15f;
+
     public static BitmapFont font;
 
 }

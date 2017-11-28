@@ -1,6 +1,7 @@
 package com.clom.clashofminions;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -19,6 +20,7 @@ import com.clom.clashofminions.Nodes.ButtonNode;
 public class SettingsScreen implements Screen {
 
     final ClashOfMinions game;
+    Preferences preferences;
 
     Stage stage;
     Table table;
@@ -27,29 +29,47 @@ public class SettingsScreen implements Screen {
     {
         this.game = game;
 
+        //Preferences
+        preferences = Gdx.app.getPreferences("UserData");
+        String name = preferences.getString("userName", "");
+        String address = preferences.getString("serverAddress", "infinisil.com:8081");
+
         stage = new Stage();
 
+        //Background
         MenuBackgroundNode bg = new MenuBackgroundNode();
         bg.setWidth(stage.getWidth());
         bg.setHeight(stage.getHeight());
         stage.addActor(bg);
 
+        //Table
         table = new Table();
         table.setFillParent(true);
-        //table.setDebug(true);
         stage.addActor(table);
 
+        //BackButton
         ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
         backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
-        TextField textField = new TextField("", game.skin);
-        Label label = new Label("Your name:", game.skin);
-        label.setColor(0, 0, 0, 1);
+        //Name
+        final TextField nameTextField = new TextField(name, game.skin);
+        nameTextField.setText(name);
+        Label nameLabel = new Label("Your name:", game.skin);
+        nameLabel.setColor(0, 0, 0, 1);
 
-        table.add(label).padBottom(10);
+        //IP
+        final TextField addressTextField = new TextField(address, game.skin);
+        Label addressLabel = new Label("Server address:", game.skin);
+        addressLabel.setColor(0, 0, 0, 1);
+
+        table.add(nameLabel).padBottom(10);
         table.row();
-        table.add(textField).padBottom(UIConstants.menuButtonHeight * stage.getHeight());;
+        table.add(nameTextField).padBottom(UIConstants.menuButtonHeight * stage.getHeight() * 0.5f);;
+        table.row();
+        table.add(addressLabel).padBottom(10);
+        table.row();
+        table.add(addressTextField).padBottom(UIConstants.menuButtonHeight * stage.getHeight());;
         table.row();
         table.add(backButton);
 
@@ -60,6 +80,9 @@ public class SettingsScreen implements Screen {
             {
                 System.out.println("Back");
                 game.setScreen(new MainMenuScreen(game));
+                preferences.putString("userName", nameTextField.getText());
+                preferences.putString("serverAddress", addressTextField.getText());
+                preferences.flush();
             }
         });
 
