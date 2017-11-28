@@ -48,7 +48,7 @@ public class SettingsScreen implements Screen {
         stage.addActor(table);
 
         //BackButton
-        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu.png")));
+        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
         backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 

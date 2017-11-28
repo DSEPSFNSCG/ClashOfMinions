@@ -53,7 +53,8 @@ public class MinionNode extends Actor {
         batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
 
         batch.draw(minionTexture, getX(), getY(), getWidth(), getHeight());
-        UIConstants.font.draw(batch, "" + health, getX(), getY());
+        //UIConstants.font.draw(batch, "" + health, getX(), getY());
+
         Float healthBarPositionX = getX() + getWidth() * 0.05f;
         Float healthBarPositionY = getY() + getHeight() * 0.1f;
         Float healthBarWidth = getWidth() * 0.15f;

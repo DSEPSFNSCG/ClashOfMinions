@@ -39,7 +39,7 @@ public class LoadingScreen implements Screen {
         //table.setDebug(true);
         stage.addActor(table);
 
-        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu.png")));
+        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
         backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
