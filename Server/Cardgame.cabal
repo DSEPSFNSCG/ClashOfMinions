@@ -18,13 +18,25 @@ library
   exposed-modules:     Client
                      , Types
                      , Game
+                     , Client.Types
+                     , ClientStates.Generic
+                     , ClientStates.Generic.Types
+                     , ClientStates.Lobby
+                     , ClientStates.Lobby.Types
+                     , ClientStates.Waiting
+                     , ClientStates.Waiting.Types
+                     , Game.Types
   build-depends:       base >= 4.7 && < 5
-                     , aeson
+                     , aeson >= 1.2.1.0
                      , network
                      , stm
                      , bytestring
                      , random
                      , transformers
+                     , monads-tf
+                     , monad-stm
+                     , transformers
+                     , monad-stm
   default-language:    Haskell2010
 
 executable server
@@ -35,6 +47,8 @@ executable server
                      , Cardgame
                      , network
                      , stm
+                     , monad-stm
+                     , transformers
   default-language:    Haskell2010
 
 test-suite Server-test

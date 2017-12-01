@@ -1,63 +1,74 @@
-module Game (newGame
-            , Game
-            , runGame
-            ) where
+module Game where
+
+import           Client
+import           Client.Types
+import           ClientStates.Generic
+import           ClientStates.Generic.Types
+import           ClientStates.Lobby.Types
+import           ClientStates.Waiting.Types
+import           Data.Word
+import           Game.Types
 
 import           Data.Tuple
 import           Types
 
-import           Control.Concurrent      (forkIO)
+import           Control.Concurrent         (forkIO)
 import           Control.Concurrent.Chan
 import           Control.Concurrent.STM
 import           Data.Aeson
-import qualified Data.ByteString         as BS
-import           Data.ByteString.Lazy    (fromStrict, toStrict)
-import qualified Network.Socket          as NS
-import           System.IO               (Handle, hClose, hIsEOF)
-import           System.Random           (RandomGen, random, randomIO)
+import           Data.Aeson.Types
+import qualified Data.ByteString            as BS
+import           Data.ByteString.Lazy       (fromStrict, toStrict)
+import           GHC.Generics
+import qualified Network.Socket             as NS
+import           System.IO                  (Handle, hClose, hIsEOF)
+import           System.Random              (RandomGen, random, randomIO)
 
-broadcast :: Game -> Reply -> IO ()
-broadcast (MkGame { players = (p1, p2) }) str = do
-  tell p1 str
-  tell p2 str
+playerSend :: ClientT c => Player c -> Response GameResponse -> IO ()
+playerSend p resp = clientSend (playerClient p) (encodeResponse resp)
+
+broadcast :: ClientT c => Game c -> Response GameResponse -> IO ()
+broadcast game resp = do
+  playerSend (currentPlayer game) resp
+  playerSend (waitingPlayer game) resp
 
 
-newPlayer :: Client -> Player
-newPlayer c = MkPlayer { playerHandle = clientHandle c
-                       , playerState = Waiting }
+newPlayer :: ClientT c => c -> String -> Word64 -> Player c
+newPlayer c name token = MkPlayer { playerClient = c
+                                        , playerName = name
+                                        , playerToken = token
+                                        , playerState = () }
 
-newGame :: GameID -> Client -> Client -> STM Game
-newGame id c1 c2 = do
+--restoreGame :: ClientT c => c -> RestoreGameRequest -> Either RestoreGameResult
+
+newGame :: ClientT c => GameID -> c -> String -> c -> String -> STM (IO ())
+newGame id c1 n1 c2 n2 = do
   queue <- newTQueue
-  return $ MkGame
-    { gameId = id
-    , players = (newPlayer c1, newPlayer c2)
-    , gamestate = ()
-    , events = queue }
+  setReceiver c1 queue
+  setReceiver c2 queue
+  return $ do
+    r <- randomIO
+    t1 <- randomIO
+    t2 <- randomIO
+    let p1 = newPlayer c1 n1 t1
+    let p2 = newPlayer c2 n2 t2
+    let game = MkGame { gameId = id
+                      , currentPlayer = if r then p1 else p2
+                      , waitingPlayer = if r then p2 else p1
+                      , gameState = ()
+                      , gameQueue = queue }
+    putStrLn "Started game"
+    gameLoop game
+    close c1
+    close c2
 
-runGame :: Game -> IO ()
-runGame game = do
-  putStrLn "Running game test"
-  putStrLn "Broadcasting something"
-  broadcast game $ Log { message = "something" }
+foo :: Event (Maybe (Request GameRequest)) -> IO Int
+foo m = return 0
 
-
-gameLoop :: Game -> IO ()
+gameLoop :: ClientT c => Game c -> IO ()
 gameLoop game = do
-  putStrLn "New game!"
-  starts <- randomIO :: IO Bool
-  putStrLn $ "Player " ++ (if starts then "1" else "2") ++ " starts"
-  let actualGame = game {
-    players = if starts then players game else swap (players game)
-  }
-  --tell (fst (players actualGame)) (Log { message = "hi p1" })
-  --tell (snd (players actualGame)) (Log { message = "hi p2" })
-  hClose (handle (fst (players actualGame)))
-  hClose (handle (snd (players actualGame)))
+  (client, message) <- atomically $ getEvent (gameQueue game)
+  foo message
+  putStrLn "Got message"
+  gameLoop game
 
-
-handleEvent :: Chan (Player, Request) -> IO ()
-handleEvent chan = do
-  event <- readChan chan
-  putStrLn "Something happened"
-  handleEvent chan

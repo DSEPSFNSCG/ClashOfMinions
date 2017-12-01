@@ -1,16 +1,14 @@
 let
-  nixpkgsRev = "cfafd6f5a819472911eaf2650b50a62f0c143e3e";
+  nixpkgsRev = "2f1a818d00f957f3102c0b412864c63b6e3e7447";
 
   nixpkgs = (import <nixpkgs> {}).fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs";
     rev = nixpkgsRev;
-    sha256 = "10xgiyh4hbwwiy8qg70ma1f27nd717aflksk9fx3ci8bmxmqbkkn";
+    sha256 = "1g9yvbkayjv4w9sa99g2zfys4kq9mrp3fznfm6qy0n5h4kqc0ifd";
   };
+in with import nixpkgs {};
 
-  pkgs = import nixpkgs {};
-in
-with pkgs;
 haskell.lib.buildStackProject {
   name = "Test";
   src = ./.;

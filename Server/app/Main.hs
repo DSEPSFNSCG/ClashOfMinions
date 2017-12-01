@@ -1,19 +1,25 @@
 module Main where
 
 import           Client
+import           Client.Types
+import           ClientStates.Lobby
+import           ClientStates.Waiting
+import           Game
 import           Types
 
 
-import qualified Control.Concurrent     as C
+import qualified Control.Concurrent              as C
 import           Control.Concurrent.STM
-import           Data.Maybe             (fromMaybe, listToMaybe)
-import qualified Network                as N
-import qualified Network.Socket         as NS
-import           System.Environment     (getArgs)
-import           System.IO              (BufferMode (LineBuffering),
-                                         IOMode (ReadWriteMode), hSetBuffering,
-                                         stdout)
-import           Text.Read              (readMaybe)
+import           Control.Monad.STM.Class
+import           Control.Monad.Trans.Writer.Lazy (runWriterT, tell)
+import           Data.Maybe                      (fromMaybe, listToMaybe)
+import qualified Network                         as N
+import qualified Network.Socket                  as NS
+import           System.Environment              (getArgs)
+import           System.IO                       (BufferMode (LineBuffering),
+                                                  IOMode (ReadWriteMode),
+                                                  hSetBuffering, stdout)
+import           Text.Read                       (readMaybe)
 
 defaultPort :: NS.PortNumber
 defaultPort = 8081
@@ -27,27 +33,29 @@ getPort = do
 
 main :: IO ()
 main = do
+  port <- getPort
+  server port
+
+server :: N.PortID -> IO ()
+server port = do
   -- Apparently required to get instant output with systemd
   hSetBuffering stdout LineBuffering
 
-  port <- getPort
   socket <- N.listenOn $ port
   putStrLn $ "Listening on port " ++ show port ++ ", waiting for players"
 
+  waitingQueue <- atomically $ newTQueue
+  lobbyQueue <- atomically $ newTQueue
   serverState <- atomically $ newTVar $ MkServerState { games = [], inQueue = Nothing }
-  acceptConnections serverState socket 0
 
+  C.forkIO $ waitingLoop waitingQueue lobbyQueue serverState
+  C.forkIO $ lobbyLoop waitingQueue lobbyQueue serverState
+  acceptConnections waitingQueue socket 0
 
-test :: Int -> String
-test i = show i
-
-
-acceptConnections :: TVar ServerState -> NS.Socket -> Int -> IO ()
-acceptConnections serverState socket nextId = do
+acceptConnections :: ClientQueue Client -> NS.Socket -> Int -> IO ()
+acceptConnections queue socket nextId = do
   (clientSocket, _) <- NS.accept socket
   handle <- NS.socketToHandle clientSocket ReadWriteMode
   hSetBuffering handle LineBuffering
-  _ <- C.forkIO $ clientHandler serverState handle nextId
-  acceptConnections serverState socket $ nextId + 1
-
-
+  C.forkIO $ handleClient queue handle nextId
+  acceptConnections queue socket $ nextId + 1
