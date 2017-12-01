@@ -68,5 +68,4 @@ extra-package-dbs: []
 # compiler-check: newer-minor
 
 nix:
-  enable: true
   shell-file: default.nix
