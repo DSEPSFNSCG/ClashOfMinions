@@ -168,6 +168,7 @@ public class BattleField extends Group {
 
     Boolean draggedTo(float x, float y)
     {
+        if (!battleFieldLogic.isLeftPlayerTurn) return false;
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
         if (coord.x == -1 || coord.y == -1) return false;
         if (coord.x >= 4 && battleFieldLogic.isLeftPlayerTurn) return false;
@@ -219,14 +220,34 @@ public class BattleField extends Group {
 
     public void placeFloatingMinion()
     {
-        Boolean gameOver = false;
+        placeMinion(floatingMinion, true);
+        floatingMinion = null;
+    }
 
-        if (floatingMinion != null)
+    public void placeMinion(MinionNode minionNode, Boolean animated)
+    {
+        Boolean gameOver;
+        if (minionNode != null)
         {
-            gameOver = battleFieldLogic.addMinionAsTurn(floatingMinion, floatingMinion.minion.xPos, floatingMinion.minion.yPos, floatingMinion.minion.isLeftPlayer);
-            floatingMinion.updateStats();
-            floatingMinion.isFloating = false;
-            floatingMinion = null;
+            Boolean occupied = battleFieldLogic.field[minionNode.minion.xPos][minionNode.minion.yPos] != null;
+            if (occupied)
+            {
+                placeMinion(null, animated);
+                return;
+            }
+
+            if (!minionNode.hasParent())
+            {
+                Vector2 pos = coordinatesToPosition(new GridPoint2(minionNode.minion.xPos, minionNode.minion.yPos));
+                minionNode.setPosition(pos.x, pos.y);
+                minionNode.setWidth(getWidth()/UIConstants.battleFieldTilesHorizontal);
+                minionNode.setHeight(getHeight()/UIConstants.battleFieldTilesVertical);
+                addActor(minionNode);
+            }
+
+            gameOver = battleFieldLogic.addMinionAsTurn(minionNode, minionNode.minion.xPos, minionNode.minion.yPos, minionNode.minion.isLeftPlayer);
+            minionNode.updateStats();
+            minionNode.isFloating = false;
         }
         else
         {
@@ -238,12 +259,12 @@ public class BattleField extends Group {
             game.gameOver();
         }
 
-        float moveDuration = runMoveAnimations(0);
-        float healDuration = runHealAnimations(moveDuration);
-        float attackDuration = runAttackAnimations(moveDuration + healDuration);
+        float moveDuration = runMoveAnimations(0, animated);
+        float healDuration = runHealAnimations(moveDuration, animated);
+        float attackDuration = runAttackAnimations(moveDuration + healDuration, animated);
     }
 
-    float runMoveAnimations(float delay)
+    float runMoveAnimations(float delay, boolean animated)
     {
         removePopUp();
 
@@ -251,13 +272,14 @@ public class BattleField extends Group {
         for (MinionNode node : battleFieldLogic.movedMinions)
         {
             Vector2 newPosition = coordinatesToPosition(new GridPoint2(node.minion.xPos, node.minion.yPos));
-            node.addAction(Actions.moveTo(newPosition.x, newPosition.y, duration, Interpolation.smooth));
+            if (animated) node.addAction(Actions.moveTo(newPosition.x, newPosition.y, duration, Interpolation.smooth));
+            else node.setPosition(newPosition.x, newPosition.y);
             //node.setPosition(newPosition.x, newPosition.y);
         }
         return duration;
     }
 
-    float runHealAnimations(float delay)
+    float runHealAnimations(float delay, Boolean animated)
     {
         float duration = 0.5f;
         float sDelay = 0f;
@@ -266,20 +288,24 @@ public class BattleField extends Group {
             final MinionNode n1 = event.src;
             for (int i = 0; i < event.targets.size(); i++) {
                 final MinionNode n2 = event.targets.get(i);
-                healAnimation(
+                if (animated) healAnimation(
                         new GridPoint2(n1.minion.xPos, n1.minion.yPos),
                         new GridPoint2(n2.minion.xPos, n2.minion.yPos),
                         n2,
                         event.value1.get(i),
                         delay + sDelay,
                         duration);
+                else
+                {
+                    n2.updateStats();
+                }
             }
             sDelay += duration;
         }
         return sDelay;
     }
 
-    float runAttackAnimations(float delay)
+    float runAttackAnimations(float delay, Boolean animated)
     {
         float duration = 0.5f;
         float sDelay = 0f;
@@ -289,7 +315,7 @@ public class BattleField extends Group {
             for (int i = 0; i < event.targets.size(); i++) {
                 final MinionNode n2 = event.targets.get(i);
                 final boolean lethal = event.lethal.get(i);
-                shootProjectile(
+                if (animated) shootProjectile(
                         new GridPoint2(n1.minion.xPos, n1.minion.yPos),
                         new GridPoint2(n2.minion.xPos, n2.minion.yPos),
                         n2,
@@ -297,12 +323,20 @@ public class BattleField extends Group {
                         delay + sDelay,
                         duration,
                         event.value2.get(i));
+                else
+                {
+                    n2.updateStats();
+                }
 
                 if (lethal) {
-                    n2.addAction(Actions.sequence(
+                    if (animated) n2.addAction(Actions.sequence(
                             Actions.delay(delay + sDelay + duration),
                             Actions.fadeOut(0.2f),
                             Actions.removeActor()));
+                    else
+                    {
+                        n2.remove();
+                    }
                 }
             }
             sDelay += duration;

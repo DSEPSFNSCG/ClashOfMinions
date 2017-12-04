@@ -3,36 +3,41 @@ package com.clom.clashofminions;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.clom.clashofminions.BattleField.BattleField;
+import com.clom.clashofminions.BattleField.MinionNode;
+import com.clom.clashofminions.Connection.ConnectionHandler;
+import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
 import com.clom.clashofminions.Nodes.ButtonNode;
 import com.clom.clashofminions.Nodes.ManaBarNode;
 import com.clom.clashofminions.Nodes.SliderNode;
 import com.clom.clashofminions.Nodes.SliderType;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
-import java.awt.Button;
 
 /**
  * Created by greensn on 08.11.17.
  */
 
-public class GameScreen implements Screen {
+public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     final ClashOfMinions game;
+
+    ConnectionHandler connectionHandler;
 
     Stage stage;
     ButtonNode pauseButton;
@@ -44,6 +49,7 @@ public class GameScreen implements Screen {
     Texture turnButtonTexture;
     Texture quitButtonTexture;
     Texture continueButtonTexture;
+    Texture nameTagTexture;
 
     Group sliderGroup;
     Array<SliderNode> sliders = new Array<SliderNode>();
@@ -54,9 +60,12 @@ public class GameScreen implements Screen {
 
     Group pauseMenuGroup;
 
-    GameScreen(final ClashOfMinions game)
+    GameScreen(final ClashOfMinions game, ConnectionHandler connectionHandler)
     {
         this.game = game;
+        this.connectionHandler = connectionHandler;
+        connectionHandler.setDelegate(this);
+
         stage = new Stage();
 
         loadTextures();
@@ -113,6 +122,7 @@ public class GameScreen implements Screen {
         turnButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Turn.png"));
         quitButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Quit.png"));
         continueButtonTexture = new Texture(Gdx.files.internal("Button-Menu-Play.png"));
+        nameTagTexture = new Texture(Gdx.files.internal("NameSign.png"));
     }
 
     void registerListeners()
@@ -162,32 +172,36 @@ public class GameScreen implements Screen {
 
     void setupBattleField()
     {
+        Preferences preferences = Gdx.app.getPreferences("UserData");
+
         battleField = new BattleField(this);
         battleField.setHeight(UIConstants.battleFieldHeight * stage.getHeight());
         battleField.setWidth(battleField.getHeight()/UIConstants.battleFieldTilesVertical * UIConstants.battleFieldTilesHorizontal);
         battleField.setPosition(UIConstants.battleFieldPositionX * stage.getWidth(), UIConstants.battleFieldPositionY * stage.getHeight());
         stage.addActor(battleField);
         battleField.setup();
+        battleField.battleFieldLogic.isLeftPlayerTurn = preferences.getBoolean("isFirstPlayer", true);
 
-        Image nameTagSprite = new Image(pauseBackgroundTexture);
+        Image nameTagSprite = new Image(nameTagTexture);
         nameTagSprite.setWidth(UIConstants.nameTagWidth * stage.getWidth());
         nameTagSprite.setHeight(UIConstants.nameTagHeight * stage.getWidth());
-        nameTagSprite.setPosition(battleField.getX() + battleField.getWidth() * 0.125f, battleField.getY() - battleField.getHeight() * 0.15f);
+        nameTagSprite.setPosition(battleField.getX() + battleField.getWidth() * 0.025f, battleField.getY() + battleField.getHeight() * (1 - 0.0f));
         stage.addActor(nameTagSprite);
 
-        Image nameTagSprite2 = new Image(pauseBackgroundTexture);
+        Image nameTagSprite2 = new Image(nameTagTexture);
         nameTagSprite2.setWidth(UIConstants.nameTagWidth * stage.getWidth());
         nameTagSprite2.setHeight(UIConstants.nameTagHeight * stage.getWidth());
-        nameTagSprite2.setPosition(battleField.getX() + battleField.getWidth() * (1 - 0.34f), battleField.getY() + battleField.getHeight() * (1 - 0.02f));
+        nameTagSprite2.setPosition(battleField.getX() + battleField.getWidth() * (1 - 0.24f), battleField.getY() + battleField.getHeight() * (1 - 0.0f));
         stage.addActor(nameTagSprite2);
 
-        Preferences preferences = Gdx.app.getPreferences("UserData");
         Label playerNameLabel = new Label(preferences.getString("userName"), game.skin);
+        playerNameLabel.setColor(Color.BLACK);
         final GlyphLayout nameLayout = new GlyphLayout(UIConstants.font, playerNameLabel.getText());
         playerNameLabel.setPosition(nameTagSprite.getX() + nameTagSprite.getWidth()/2 - nameLayout.width/2, nameTagSprite.getY() + nameTagSprite.getHeight()/2 - nameLayout.height);
         stage.addActor(playerNameLabel);
 
-        Label playerNameLabel2 = new Label("Mallory", game.skin);
+        Label playerNameLabel2 = new Label(preferences.getString("opponentName"), game.skin);
+        playerNameLabel2.setColor(Color.BLACK);
         final GlyphLayout nameLayout2 = new GlyphLayout(UIConstants.font, playerNameLabel2.getText());
         playerNameLabel2.setPosition(nameTagSprite2.getX() + nameTagSprite2.getWidth()/2 - nameLayout2.width/2, nameTagSprite2.getY() + nameTagSprite2.getHeight()/2 - nameLayout2.height);
         stage.addActor(playerNameLabel2);
@@ -321,12 +335,24 @@ public class GameScreen implements Screen {
 
     private void quitAction()
     {
+        connectionHandler.quitGame();
+        returnToMainMenu();
+    }
+
+    private void returnToMainMenu()
+    {
+        Preferences preferences = Gdx.app.getPreferences("UserData");
+        preferences.putBoolean("gameRunning", false);
+        preferences.flush();
+
         game.setScreen(new MainMenuScreen(game));
     }
 
     private void placeAction()
     {
+        if (!battleField.battleFieldLogic.isLeftPlayerTurn) return;
         updateMinionStats();
+        sendFloatingMinion();
         battleField.placeFloatingMinion();
     }
 
@@ -346,6 +372,92 @@ public class GameScreen implements Screen {
     public void gameOver()
     {
         Boolean leftWinner = battleField.battleFieldLogic.isLeftPlayerTurn;
-        quitAction();
+
+        battleField.setTouchable(Touchable.disabled);
+        sliderGroup.setTouchable(Touchable.disabled);
+        turnButton.setTouchable(Touchable.disabled);
+        pauseButton.setTouchable(Touchable.disabled);
+
+
+        Timer.schedule(new Timer.Task(){
+            @Override
+            public void run() {
+                quitAction();
+            }
+        }, 2.0f);
+    }
+
+
+
+    void placeReceivedMinion(int x, int y, int[] values, Boolean animated) {
+        if (x == -1 || y == -1)
+        {
+            battleField.placeMinion(null, animated);
+        }
+        else
+        {
+            MinionNode minionNode = new MinionNode(false);
+            minionNode.minion.xPos = x;
+            minionNode.minion.yPos = y;
+
+            for (int i = 0; i < values.length; i++)
+            {
+                SliderType type = SliderType.values()[i];
+                minionNode.minion.setAttribute(type.toString(), type.valueForStep(values[i]));
+            }
+            minionNode.minion.setAttribute("MaxHealth", minionNode.minion.getAttribute("Health"));
+            minionNode.updateStats();
+
+            battleField.placeMinion(minionNode, animated);
+        }
+    }
+
+    void sendFloatingMinion()
+    {
+        if (battleField.floatingMinion != null)
+        {
+            int x = battleField.floatingMinion.minion.xPos;
+            int y = battleField.floatingMinion.minion.xPos;
+            int[] values = new int[8];
+            for (int i = 0; i < 8; i++)
+            {
+                SliderNode slider = sliders.get(i);
+                values[i] = slider.actualStep;
+            }
+            connectionHandler.sendMove(x, y, values);
+        }
+        else
+        {
+            connectionHandler.sendMove(-1, -1, null);
+        }
+    }
+
+    @Override
+    public void gameFound(String token, String opponentName, Boolean isFirstPlayer) {
+
+    }
+
+    @Override
+    public void receivedMove(int x, int y, int[] values) {
+        placeReceivedMinion(x, y, values, true);
+    }
+
+    @Override
+    public void opponentQuit() {
+        returnToMainMenu();
+    }
+
+    @Override
+    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
+        int turns = xs.length;
+
+        for (int i = 0; i < turns; i++)
+        {
+            int x = xs[i];
+            int y = ys[i];
+            int[] values = valuesArray[i];
+            placeReceivedMinion(x, y, values, false);
+        }
+
     }
 }

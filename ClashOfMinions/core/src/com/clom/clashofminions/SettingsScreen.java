@@ -7,10 +7,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.clom.clashofminions.Nodes.ButtonNode;
 
 /**
@@ -41,6 +43,13 @@ public class SettingsScreen implements Screen {
         bg.setWidth(stage.getWidth());
         bg.setHeight(stage.getHeight());
         stage.addActor(bg);
+
+        //Sign
+        Image sign = new Image(new Texture(Gdx.files.internal("Settings-Sign.png")));
+        sign.setWidth(stage.getHeight() * 0.4f);
+        sign.setHeight(stage.getHeight() * 0.4f);
+        sign.setPosition(stage.getWidth()/2, stage.getHeight() * 0.64f, Align.center);
+        stage.addActor(sign);
 
         //Table
         table = new Table();
