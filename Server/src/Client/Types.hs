@@ -1,36 +1,23 @@
 module Client.Types where
 
-import           ClientStates.Generic.Types
-import           Control.Concurrent.STM          (STM, TQueue, TVar, writeTVar)
-import           Control.Monad.Trans.Writer.Lazy (WriterT)
-import           Data.ByteString.Char8           (ByteString, hPutStrLn)
-import           System.IO                       (Handle, hClose)
+import           Control.Concurrent.STM (TQueue, TVar)
+import           Data.ByteString.Char8  (ByteString)
+import           System.IO              (Handle)
 
-data Event r = Connect
-           | Input r
-           | Disconnect
+type ByteQueue = TQueue (Client, Maybe ByteString)
 
-instance Functor Event where
-  fmap f e = case e of
-    Connect    -> Connect
-    Input r    -> Input $ f r
-    Disconnect -> Disconnect
-
-class (Eq c, Show c) => ClientT c where
-  clientRun :: c -> IO ()
-  clientSend :: c -> ByteString -> IO ()
-  setReceiver :: c -> ClientQueue c -> STM ()
-  close :: c -> IO ()
-
-type ClientQueue c = TQueue (c, Event ByteString)
-
-
+type ClientRequest r = (Client, Maybe (Maybe r))
 
 data Client =
   MkClient { clientId     :: Int
            , clientHandle :: Handle
-           , clientQueue  :: TVar (ClientQueue Client)
+           , clientQueue  :: TVar ByteQueue
            }
 
-type ClientMonad a = WriterT String STM a
+instance Eq Client where
+  c1 == c2 = (clientId c1) == (clientId c2)
+
+instance Show Client where
+  show c = show (clientId c)
+
 

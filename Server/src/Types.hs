@@ -1,30 +1,66 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Types where
 
 import           Client.Types
-import           ClientStates.Generic.Types
-import           ClientStates.Waiting.Types
-import           Game.Types
-
-import qualified Control.Concurrent              as C
-import           Control.Concurrent.STM
+import           Control.Concurrent.STM          (STM, TVar)
 import           Control.Monad.Trans.Writer.Lazy (WriterT)
 import           Data.Aeson
-import           Data.Aeson.Types
-import qualified Data.ByteString.Char8           as BS
-import           Data.ByteString.Lazy            (fromStrict, toStrict)
+import           Game.Types
 import           GHC.Generics
-import qualified Network.Socket                  as NS
-import           System.IO                       (Handle, hIsEOF)
+import           System.Random
+import           Utils
+
+data Server = Server { initQueue      :: ByteQueue
+                     , waitQueue      :: ByteQueue
+                     , serverStateVar :: TVar ServerState
+                     }
+
+data ServerState = ServerState { games   :: [Game]
+                               , inQueue :: Maybe (Client, String)
+                               , rng     :: StdGen
+                               }
+
+initialServerState :: IO ServerState
+initialServerState = do
+  rng <- getStdGen
+  return $ ServerState { games = []
+                       , inQueue = Nothing
+                       , rng = rng
+                       }
 
 
+data RestoreGameRequest = RestoreGameRequest { gameID      :: Int
+                                             , token_t     :: Token
+                                             , historyFrom :: Maybe Int }
+                          deriving (Generic, Show)
+
+data WaitingRequest = NewGame { name :: String }
+                    | RestoreGame RestoreGameRequest
+                    deriving (Generic, Show)
+
+type LogSTM a = WriterT String STM a
+
+type TransResult r a = LogSTM (ServerState, Maybe (Either r a))
+
+data WaitingResponse = Queued
+                     | RestoreSuccess History
+                     | InvalidGameID
+                     | TokenMismatch
+                     | GameOver
+                     | InvalidWaitingRequest
+                     deriving (Generic, Show)
 
 
-data ServerState c = MkServerState { games :: [Game c]
-                                 , inQueue :: Maybe (c, String)
-                                 }
+instance FromJSON WaitingRequest where
+  parseJSON = genericParseJSON customOptions
+instance ToJSON WaitingRequest where
+  toEncoding = genericToEncoding customOptions
 
-type WriterSTM a = WriterT String STM a
+instance FromJSON RestoreGameRequest where
+  parseJSON = genericParseJSON defaultOptions
+instance ToJSON RestoreGameRequest where
+  toEncoding = genericToEncoding defaultOptions
 
-
-
+instance ToJSON WaitingResponse where
+  toEncoding = genericToEncoding customOptions
 

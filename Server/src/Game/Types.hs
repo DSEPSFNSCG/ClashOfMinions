@@ -1,44 +1,100 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric        #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 module Game.Types where
 
 import           Client.Types
-import           ClientStates.Generic.Types
-import           Data.Aeson.Types
-import           Data.Word
-import           GHC.Generics
+import           Utils
 
-data GameRequest = Place
+import           Control.Concurrent.STM
+import           Data.Aeson.Types
+import           Data.Matrix
+import           Data.Maybe
+import           GHC.Generics
+import           GHC.Word
+
+subOptions = customOptions
+  { tagSingleConstructors = False
+  }
+
+
+data GameRequest = Place Placement
                    deriving (Generic, Show)
 
-data GameResponse = Success
+data Placement = Placement { f_position :: (Int, Int)
+                           , f_stats    :: Stats
+                           }
+                 deriving (Generic, Show)
+
+data GameResponse = PlaceSuccess
                   | InvalidPlacing
-                  | Placed
+                  | InvalidGameRequest
+                  | LogResponse String
+                  | GameStart { f_gameId    :: Int
+                              , f_youStart  :: Bool
+                              , f_otherName :: String
+                              , f_token     :: Token }
                     deriving (Generic, Show)
 
+data GameEvent = PlayerDisconnect
+               | PlayerRequest GameRequest
+               | PlayerReconnect
 
-instance FromJSON GameRequest where
-  parseJSON = genericParseJSON customOptions
 
-instance ToJSON GameResponse where
-  toEncoding = genericToEncoding customOptions
 
+data Stats = MkStats { f_health :: Int
+                     }
+             deriving (Generic, Show)
+
+data History = History [Placement]
+             deriving (Generic, Show)
+
+
+data Minion = MkMinion { f_minionStats :: Stats }
+type Field = Matrix (Maybe Minion)
+
+
+
+data GameState = MkGameState { history       :: History
+                             , field         :: Field
+                             , currentPlayer :: Player
+                             , waitingPlayer :: Player
+                             }
+
+type GameQueue = TQueue (Player, GameEvent)
 
 type GameID = Int
-data Game c = MkGame
-  { gameId        :: GameID
-  , currentPlayer :: Player c
-  , waitingPlayer :: Player c
-  , gameState     :: ()
-  , gameQueue     :: ClientQueue c}
+data Game = MkGame
+  { gameId     :: Int
+  , p1         :: Player
+  , p2         :: Player
+  , gameState  :: TVar GameState
+  , transQueue :: ByteQueue
+  , gameQueue  :: GameQueue }
 
 
-data Move = Move { test :: String
-                 }
+type Token = Word64
+data Player = MkPlayer { playerClient :: TVar (Maybe Client)
+                       , playerName   :: String
+                       , playerToken  :: Token
+                       }
 
-type PlayerState = ()
+instance Eq Player where
+  p == p' = (playerToken p) == (playerToken p')
 
-data Player c = MkPlayer { playerClient :: c
-                         , playerState  :: PlayerState
-                         , playerName   :: String
-                         , playerToken  :: Word64
-                         } deriving (Show)
+instance FromJSON Stats where
+  parseJSON = genericParseJSON subOptions
+instance FromJSON GameRequest where
+  parseJSON = genericParseJSON customOptions
+instance FromJSON Placement where
+  parseJSON = genericParseJSON subOptions
+
+instance ToJSON History where
+  toEncoding = genericToEncoding subOptions
+instance ToJSON Placement where
+  toEncoding = genericToEncoding subOptions
+instance ToJSON Stats where
+  toEncoding = genericToEncoding subOptions
+instance ToJSON GameRequest where
+  toEncoding = genericToEncoding customOptions
+instance ToJSON GameResponse where
+  toEncoding = genericToEncoding customOptions
