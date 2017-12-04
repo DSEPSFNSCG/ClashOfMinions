@@ -17,7 +17,7 @@ playerSend player response = do
 
 initialGameState :: Player -> Player -> GameState
 initialGameState currentPlayer waitingPlayer =
-  MkGameState { history = History []
+  MkGameState { history = []
               , field = matrix 4 10 (const Nothing)
               , currentPlayer = currentPlayer
               , waitingPlayer = waitingPlayer

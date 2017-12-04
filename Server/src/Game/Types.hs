@@ -20,6 +20,7 @@ subOptions = customOptions
 data GameRequest = Place Placement
                    deriving (Generic, Show)
 
+type History = [Placement]
 data Placement = Placement { f_position :: (Int, Int)
                            , f_stats    :: Stats
                            }
@@ -43,9 +44,6 @@ data GameEvent = PlayerDisconnect
 
 data Stats = MkStats { f_health :: Int
                      }
-             deriving (Generic, Show)
-
-data History = History [Placement]
              deriving (Generic, Show)
 
 
@@ -88,8 +86,6 @@ instance FromJSON GameRequest where
 instance FromJSON Placement where
   parseJSON = genericParseJSON subOptions
 
-instance ToJSON History where
-  toEncoding = genericToEncoding subOptions
 instance ToJSON Placement where
   toEncoding = genericToEncoding subOptions
 instance ToJSON Stats where
