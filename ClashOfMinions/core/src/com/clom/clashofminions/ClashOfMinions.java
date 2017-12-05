@@ -16,7 +16,7 @@ public class ClashOfMinions extends Game {
 	public static final float WIDTH = 1138;
 
 	SpriteBatch batch;
-	Skin skin;
+	public Skin skin;
 
 	Camera cam;
 

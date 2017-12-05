@@ -48,12 +48,14 @@ public class SettingsScreen implements Screen {
         Image sign = new Image(new Texture(Gdx.files.internal("Settings-Sign.png")));
         sign.setWidth(stage.getHeight() * 0.4f);
         sign.setHeight(stage.getHeight() * 0.4f);
-        sign.setPosition(stage.getWidth()/2, stage.getHeight() * 0.64f, Align.center);
+        sign.setPosition(stage.getWidth()/2, stage.getHeight() * 0.765f, Align.center);
         stage.addActor(sign);
 
         //Table
         table = new Table();
-        table.setFillParent(true);
+        table.setWidth(stage.getWidth());
+        table.setHeight(stage.getHeight()/4);
+        table.setPosition(0, stage.getHeight()/2);
         stage.addActor(table);
 
         //BackButton

@@ -39,8 +39,6 @@ public class MainMenuScreen implements Screen {
         table.setWidth(stage.getWidth());
         table.setHeight(stage.getHeight()/4);
         table.setPosition(0, stage.getHeight()/2);
-        //table.setFillParent(true);
-        //table.setDebug(true);
         stage.addActor(table);
 
         ButtonNode playButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Play.png")));

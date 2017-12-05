@@ -13,20 +13,18 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
 import com.clom.clashofminions.BattleField.BattleField;
 import com.clom.clashofminions.BattleField.MinionNode;
 import com.clom.clashofminions.Connection.ConnectionHandler;
 import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
 import com.clom.clashofminions.Nodes.ButtonNode;
+import com.clom.clashofminions.Nodes.GameOverGroup;
 import com.clom.clashofminions.Nodes.ManaBarNode;
 import com.clom.clashofminions.Nodes.SliderNode;
 import com.clom.clashofminions.Nodes.SliderType;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 
 /**
@@ -35,7 +33,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
-    final ClashOfMinions game;
+    public final ClashOfMinions game;
 
     ConnectionHandler connectionHandler;
 
@@ -59,6 +57,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     BattleField battleField;
 
     Group pauseMenuGroup;
+
+    GameOverGroup gameOverGroup;
 
     GameScreen(final ClashOfMinions game, ConnectionHandler connectionHandler)
     {
@@ -312,6 +312,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             battleField.setTouchable(Touchable.disabled);
             sliderGroup.setTouchable(Touchable.disabled);
             turnButton.setTouchable(Touchable.disabled);
+            battleField.removePopUp();
 
             pauseMenuGroup.setVisible(true);
         }
@@ -339,7 +340,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         returnToMainMenu();
     }
 
-    private void returnToMainMenu()
+    public void returnToMainMenu()
     {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", false);
@@ -350,7 +351,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     private void placeAction()
     {
-        if (!battleField.battleFieldLogic.isLeftPlayerTurn) return;
+        if (!battleField.battleFieldLogic.isLeftPlayerTurn || battleField.animationsRunning) return;
         updateMinionStats();
         sendFloatingMinion();
         battleField.placeFloatingMinion();
@@ -369,34 +370,32 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         }
     }
 
-    public void gameOver()
+    public void gameOver(Boolean leftWinner, Boolean quit)
     {
-        Boolean leftWinner = battleField.battleFieldLogic.isLeftPlayerTurn;
-
         battleField.setTouchable(Touchable.disabled);
         sliderGroup.setTouchable(Touchable.disabled);
         turnButton.setTouchable(Touchable.disabled);
         pauseButton.setTouchable(Touchable.disabled);
 
 
-        Timer.schedule(new Timer.Task(){
-            @Override
-            public void run() {
-                quitAction();
-            }
-        }, 2.0f);
+        GameOverGroup gameOverGroup = new GameOverGroup(this, leftWinner, quit);
+        gameOverGroup.setPosition(0, 0);
+        gameOverGroup.setWidth(stage.getWidth());
+        gameOverGroup.setHeight(stage.getHeight());
+        gameOverGroup.setup();
+        stage.addActor(gameOverGroup);
     }
 
 
 
-    void placeReceivedMinion(int x, int y, int[] values, Boolean animated) {
+    void placeReceivedMinion(int x, int y, int[] values, Boolean leftPlayer, Boolean animated) {
         if (x == -1 || y == -1)
         {
             battleField.placeMinion(null, animated);
         }
         else
         {
-            MinionNode minionNode = new MinionNode(false);
+            MinionNode minionNode = new MinionNode(leftPlayer);
             minionNode.minion.xPos = x;
             minionNode.minion.yPos = y;
 
@@ -439,12 +438,12 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     @Override
     public void receivedMove(int x, int y, int[] values) {
-        placeReceivedMinion(x, y, values, true);
+        placeReceivedMinion(x, y, values, false, true);
     }
 
     @Override
     public void opponentQuit() {
-        returnToMainMenu();
+        gameOver(true, true);
     }
 
     @Override
@@ -456,7 +455,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             int x = xs[i];
             int y = ys[i];
             int[] values = valuesArray[i];
-            placeReceivedMinion(x, y, values, false);
+            placeReceivedMinion(x, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
         }
 
     }

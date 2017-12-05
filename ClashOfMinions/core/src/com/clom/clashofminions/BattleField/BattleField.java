@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.clom.clashofminions.GameScreen;
 import com.clom.clashofminions.UIConstants;
 
@@ -168,6 +169,7 @@ public class BattleField extends Group {
 
     Boolean draggedTo(float x, float y)
     {
+        if (animationsRunning) return false;
         if (!battleFieldLogic.isLeftPlayerTurn) return false;
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
         if (coord.x == -1 || coord.y == -1) return false;
@@ -224,8 +226,17 @@ public class BattleField extends Group {
         floatingMinion = null;
     }
 
+    public Boolean animationsRunning = false;
+    MinionNode minionWaitingForPlacement;
+
     public void placeMinion(MinionNode minionNode, Boolean animated)
     {
+        if (battleFieldLogic.gameOver) return;
+        if (animationsRunning)
+        {
+            minionWaitingForPlacement = minionNode;
+            return;
+        }
         Boolean gameOver;
         if (minionNode != null)
         {
@@ -256,12 +267,25 @@ public class BattleField extends Group {
 
         if (gameOver)
         {
-            game.gameOver();
+            game.gameOver(battleFieldLogic.isLeftPlayerTurn, false);
         }
 
         float moveDuration = runMoveAnimations(0, animated);
         float healDuration = runHealAnimations(moveDuration, animated);
         float attackDuration = runAttackAnimations(moveDuration + healDuration, animated);
+
+        if (animated)
+        {
+            animationsRunning = true;
+            Timer.schedule(new Timer.Task(){
+                @Override
+                public void run() {
+                    animationsRunning = false;
+                    if (minionWaitingForPlacement != null) placeMinion(minionWaitingForPlacement, true);
+                    minionWaitingForPlacement = null;
+                }
+            }, moveDuration + healDuration + attackDuration);
+        }
     }
 
     float runMoveAnimations(float delay, boolean animated)
@@ -421,7 +445,7 @@ public class BattleField extends Group {
         getStage().addActor(visiblePopUp);
     }
 
-    void removePopUp()
+    public void removePopUp()
     {
         if (visiblePopUp != null)
         {

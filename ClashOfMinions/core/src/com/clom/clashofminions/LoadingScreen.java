@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.clom.clashofminions.Connection.ConnectionHandler;
 import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
-import com.clom.clashofminions.Connection.GameConnectionHandler;
+import com.clom.clashofminions.Connection.AIConnectionHandler;
 import com.clom.clashofminions.Nodes.ButtonNode;
 
 /**
@@ -41,8 +41,9 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         stage.addActor(bg);
 
         table = new Table();
-        table.setFillParent(true);
-        //table.setDebug(true);
+        table.setWidth(stage.getWidth());
+        table.setHeight(stage.getHeight()/4);
+        table.setPosition(0, stage.getHeight()/2);
         stage.addActor(table);
 
         ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
@@ -121,7 +122,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         String name = preferences.getString("userName", "");
         Boolean gameRunning = preferences.getBoolean("gameRunning", false);
 
-        connectionHandler = new GameConnectionHandler();
+        connectionHandler = new AIConnectionHandler();
         connectionHandler.setDelegate(this);
 
         if (gameRunning)
