@@ -43,13 +43,19 @@ public class GameOverGroup extends Group {
         bgSprite.setWidth(getWidth());
         bgSprite.setHeight(getHeight());
 
+        Image victoryText = new Image(new Texture(Gdx.files.internal(leftPlayerWon ? "BlueVictoryText.png" : "RedVictoryText.png")));
+        victoryText.setWidth(getWidth()*0.4f);
+        victoryText.setHeight(victoryText.getWidth()*0.24375f);
+        victoryText.setPosition(getWidth()/2 - victoryText.getWidth()/2, getHeight()/2 );
 
-        Label label = new Label((quit ? "Opponent left the game!\n" : "") + (leftPlayerWon ? "Blue" : "Red") + " wins!", game.game.skin);
+        Label label = new Label((quit ? "Opponent left the game!" : ""), game.game.skin);
         label.setColor(Color.WHITE);
         final GlyphLayout nameLayout2 = new GlyphLayout(UIConstants.font, label.getText());
-        label.setPosition(getWidth()/2 - nameLayout2.width/2, getHeight()/2);
+        label.setPosition(getWidth()/2 - nameLayout2.width/2, getHeight() * 0.8f);
+
 
         addActor(bgSprite);
+        addActor(victoryText);
         addActor(label);
 
         addListener(new ActorGestureListener()

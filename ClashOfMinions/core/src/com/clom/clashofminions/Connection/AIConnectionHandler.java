@@ -68,7 +68,7 @@ public class AIConnectionHandler implements ConnectionHandler {
             public void run() {
                 if (delegate != null)
                 {
-                    if ((int)(Math.random() * 100) == 0)
+                    if ((int)(Math.random() * 2) == 0)
                     {
                         delegate.opponentQuit();
                         delegate = null;

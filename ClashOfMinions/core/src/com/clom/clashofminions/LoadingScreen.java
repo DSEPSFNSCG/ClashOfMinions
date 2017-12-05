@@ -5,8 +5,10 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.clom.clashofminions.Connection.ConnectionHandler;
@@ -39,6 +41,13 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         bg.setWidth(stage.getWidth());
         bg.setHeight(stage.getHeight());
         stage.addActor(bg);
+
+        Label loadingLabel = new Label("Searching game...", game.skin);
+        final GlyphLayout layout = new GlyphLayout(UIConstants.font, loadingLabel.getText());
+        loadingLabel.setPosition(stage.getWidth()/2 - layout.width/2, stage.getHeight() * 0.8f);
+        loadingLabel.setColor(0, 0, 0, 1);
+        stage.addActor(loadingLabel);
+
 
         table = new Table();
         table.setWidth(stage.getWidth());

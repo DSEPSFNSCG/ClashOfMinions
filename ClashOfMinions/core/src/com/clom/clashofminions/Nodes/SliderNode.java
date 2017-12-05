@@ -3,6 +3,7 @@ package com.clom.clashofminions.Nodes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -93,7 +94,9 @@ public class SliderNode extends Actor {
 
          float yOffset = actualStep == 0 ? getHeight() * 0.2f : 0f;
 
-         UIConstants.font.draw(batch, "" + type.valueForStep(actualStep), getX() + (getWidth() - layout.width)/2, getY() - sliderHeight/2 + yOffset + h * actualStep);
+         BitmapFont font = UIConstants.font;
+         font.setColor(0.7f, 0.7f, 0.7f, 1);
+         font.draw(batch, "" + type.valueForStep(actualStep), getX() + (getWidth() - layout.width)/2, getY() - sliderHeight/2 + yOffset + h * actualStep);
      }
 
      void draggedTo(float x, float y)
