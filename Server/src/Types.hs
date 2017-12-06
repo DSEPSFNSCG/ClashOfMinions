@@ -5,6 +5,7 @@ import           Client.Types
 import           Control.Concurrent.STM          (STM, TVar)
 import           Control.Monad.Trans.Writer.Lazy (WriterT)
 import           Data.Aeson
+import           Data.Aeson.Types
 import           Game.Types
 import           GHC.Generics
 import           System.Random
@@ -29,9 +30,9 @@ initialServerState = do
                        }
 
 
-data RestoreGameRequest = RestoreGameRequest { gameID      :: Int
-                                             , token_t     :: Token
-                                             , historyFrom :: Maybe Int }
+data RestoreGameRequest = RestoreGameRequest { g_gameId      :: Int
+                                             , g_token       :: Token
+                                             , g_historyFrom :: Maybe Int }
                           deriving (Generic, Show)
 
 data WaitingRequest = NewGame { name :: String }
@@ -57,9 +58,9 @@ instance ToJSON WaitingRequest where
   toEncoding = genericToEncoding customOptions
 
 instance FromJSON RestoreGameRequest where
-  parseJSON = genericParseJSON defaultOptions
+  parseJSON = genericParseJSON $ defaultOptions { fieldLabelModifier = stripPrefixes }
 instance ToJSON RestoreGameRequest where
-  toEncoding = genericToEncoding defaultOptions
+  toEncoding = genericToEncoding $ defaultOptions { fieldLabelModifier = stripPrefixes }
 
 instance ToJSON WaitingResponse where
   toEncoding = genericToEncoding customOptions

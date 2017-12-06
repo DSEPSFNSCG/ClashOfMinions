@@ -122,8 +122,8 @@ restore game client token historyFrom = do
       setReceiver client (transQueue game)
       writeTQueue (gameQueue game) (player, PlayerReconnect)
       state <- readTVar $ gameState game
-      let (History all) = history state
-      return $ Just $ History $ take (fromMaybe 0 historyFrom) all
+      let all = history state
+      return $ Just $ take (fromMaybe 0 historyFrom) all
 
 playerForClient :: Game -> Client -> STM (Maybe Player)
 playerForClient game client = do

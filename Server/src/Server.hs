@@ -104,7 +104,7 @@ waitingTrans _ s@(ServerState { inQueue = Just cn', games = games, rng = rng }) 
         _ <- forkIO $ runGame game
         return ()
   return (s { inQueue = Nothing, games = game:games, rng = rng' }, Just $ Right $ io)
-waitingTrans _ s@(ServerState { games = gs }) c (Just (RestoreGame (RestoreGameRequest { gameID = i, token_t = t, historyFrom = h }))) = do
+waitingTrans _ s@(ServerState { games = gs }) c (Just (RestoreGame (RestoreGameRequest { g_gameId = i, g_token = t, g_historyFrom = h }))) = do
   tell $ "Wants to restore game with id " ++ show i ++ ", token " ++ show t ++ ", historyFrom " ++ show h
   case i < length gs of
     False -> return (s, Just $ Left InvalidGameID)

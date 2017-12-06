@@ -1,4 +1,5 @@
 module Utils ( customOptions
+             , stripPrefixes
              ) where
 
 import           Data.Aeson.Types
@@ -9,6 +10,11 @@ import           Data.Maybe
 lowerFirst :: String -> String
 lowerFirst (x:xs) = toLower x : xs
 
+stripPrefixes :: String -> String
+stripPrefixes ('g':'_':xs) = xs
+stripPrefixes (x:'_':xs)   = xs
+stripPrefixes xs           = xs
+
 customOptions :: Options
 customOptions = defaultOptions {
   sumEncoding = defaultTaggedObject {
@@ -17,5 +23,5 @@ customOptions = defaultOptions {
   tagSingleConstructors = True,
   allNullaryToStringTag = False,
   constructorTagModifier = lowerFirst,
-  fieldLabelModifier = (\f -> fromMaybe f (stripPrefix "f_" f))
+  fieldLabelModifier = stripPrefixes
 }
