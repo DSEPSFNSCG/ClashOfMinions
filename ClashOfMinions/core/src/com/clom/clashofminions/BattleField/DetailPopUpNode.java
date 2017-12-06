@@ -67,7 +67,7 @@ public class DetailPopUpNode extends Group {
     @Override
     public void draw(Batch batch, float parentAlpha) {
 
-        batch.draw(backgroundTexture, getX(), getY(), getWidth(), getHeight());
+        batch.draw(backgroundTexture, getX(), getY(), getWidth() * 1.1f, getHeight());
 
         Float borderGapY = getWidth()/2 * 0.3f;
         Float borderGapX = getWidth()/2 * 0.3f;
@@ -91,7 +91,7 @@ public class DetailPopUpNode extends Group {
 
                 Float yPos = yTop - (k+1)*(borderGapY + rowHeight);
                 batch.draw(iconTexture, xLeft + i * columnWidth + borderGapX, yPos, rowHeight, rowHeight);
-                UIConstants.font.draw(batch, text, xLeft + i * columnWidth + textPositionX, yPos + textPositionY);
+                UIConstants.fontSmall.draw(batch, text, xLeft + i * columnWidth + textPositionX, yPos + textPositionY);
             }
         }
     }

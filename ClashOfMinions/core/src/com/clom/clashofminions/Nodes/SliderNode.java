@@ -90,12 +90,11 @@ public class SliderNode extends Actor {
          batch.draw(iconTexture, getX() - getWidth() * 0.05f - iconSize, getY() + iconSize*0.1f, iconSize, iconSize);
          //batch.draw(sliderHandle, getX(), getY() - sliderHeight/2 + h * actualStep, getWidth(), sliderHeight);
 
-         final GlyphLayout layout = new GlyphLayout(UIConstants.font, "" + type.valueForStep(actualStep));
+         final GlyphLayout layout = new GlyphLayout(UIConstants.fontSmall, "" + type.valueForStep(actualStep));
 
          float yOffset = actualStep == 0 ? getHeight() * 0.2f : 0f;
 
-         BitmapFont font = UIConstants.font;
-         font.setColor(0.7f, 0.7f, 0.7f, 1);
+         BitmapFont font = UIConstants.fontSmall;
          font.draw(batch, "" + type.valueForStep(actualStep), getX() + (getWidth() - layout.width)/2, getY() - sliderHeight/2 + yOffset + h * actualStep);
      }
 

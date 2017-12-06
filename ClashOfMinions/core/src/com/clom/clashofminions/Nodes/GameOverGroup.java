@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.clom.clashofminions.BattleField.MinionNode;
 import com.clom.clashofminions.GameScreen;
 import com.clom.clashofminions.UIConstants;
@@ -48,11 +49,11 @@ public class GameOverGroup extends Group {
         victoryText.setHeight(victoryText.getWidth()*0.24375f);
         victoryText.setPosition(getWidth()/2 - victoryText.getWidth()/2, getHeight()/2 );
 
-        Label label = new Label((quit ? "Opponent left the game!" : ""), game.game.skin);
-        label.setColor(Color.WHITE);
-        final GlyphLayout nameLayout2 = new GlyphLayout(UIConstants.font, label.getText());
-        label.setPosition(getWidth()/2 - nameLayout2.width/2, getHeight() * 0.8f);
-
+        Float labelScale = 0.4f;
+        Label label = new Label((quit ? "Opponent left the game!" : ""), UIConstants.labelStyle);
+        label.setFontScale(labelScale);
+        label.setBounds(0, getHeight()*0.6f, getWidth(), getHeight()*0.4f);
+        label.setAlignment(Align.center);
 
         addActor(bgSprite);
         addActor(victoryText);

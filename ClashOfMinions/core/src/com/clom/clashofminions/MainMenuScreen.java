@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.clom.clashofminions.Nodes.ButtonNode;
 
 /**
@@ -27,7 +28,7 @@ public class MainMenuScreen implements Screen {
     {
         this.game = game;
 
-        stage = new Stage();
+        stage = new Stage(new StretchViewport(ClashOfMinions.WIDTH, ClashOfMinions.HEIGHT));
 
 
         MenuBackgroundNode bg = new MenuBackgroundNode();

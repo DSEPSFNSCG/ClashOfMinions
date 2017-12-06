@@ -1,6 +1,7 @@
 package com.clom.clashofminions;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 
 /**
  * Created by greensn on 09.11.17.
@@ -45,5 +46,11 @@ public class UIConstants {
     public static final float nameTagWidth = 0.15f;
 
     public static BitmapFont font;
+    public static Label.LabelStyle labelStyle;
+
+    public static BitmapFont fontSmall;
+    public static Label.LabelStyle labelStyleSmall;
+
+    public static Float densityFactor;
 
 }

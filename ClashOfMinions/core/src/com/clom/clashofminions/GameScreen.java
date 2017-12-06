@@ -15,7 +15,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.clom.clashofminions.BattleField.BattleField;
 import com.clom.clashofminions.BattleField.MinionNode;
 import com.clom.clashofminions.Connection.ConnectionHandler;
@@ -66,7 +68,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         this.connectionHandler = connectionHandler;
         connectionHandler.setDelegate(this);
 
-        stage = new Stage();
+        stage = new Stage(new StretchViewport(ClashOfMinions.WIDTH, ClashOfMinions.HEIGHT));
 
         loadTextures();
         setupBackground();
@@ -194,16 +196,19 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         nameTagSprite2.setPosition(battleField.getX() + battleField.getWidth() * (1 - 0.24f), battleField.getY() + battleField.getHeight() * (1 - 0.0f));
         stage.addActor(nameTagSprite2);
 
-        Label playerNameLabel = new Label(preferences.getString("userName"), game.skin);
-        playerNameLabel.setColor(Color.BLACK);
-        final GlyphLayout nameLayout = new GlyphLayout(UIConstants.font, playerNameLabel.getText());
-        playerNameLabel.setPosition(nameTagSprite.getX() + nameTagSprite.getWidth()/2 - nameLayout.width/2, nameTagSprite.getY() + nameTagSprite.getHeight()/2 - nameLayout.height);
+        Label playerNameLabel = new Label(preferences.getString("userName"), UIConstants.labelStyle);
+        Float labelScale = 0.9f * nameTagSprite.getHeight()/playerNameLabel.getHeight();
+        playerNameLabel.setColor(new Color(0x4169E1FF));
+        playerNameLabel.setFontScale(labelScale);
+        playerNameLabel.setBounds(nameTagSprite.getX(), nameTagSprite.getY(), nameTagSprite.getWidth(), nameTagSprite.getHeight());
+        playerNameLabel.setAlignment(Align.center);
         stage.addActor(playerNameLabel);
 
-        Label playerNameLabel2 = new Label(preferences.getString("opponentName"), game.skin);
-        playerNameLabel2.setColor(Color.BLACK);
-        final GlyphLayout nameLayout2 = new GlyphLayout(UIConstants.font, playerNameLabel2.getText());
-        playerNameLabel2.setPosition(nameTagSprite2.getX() + nameTagSprite2.getWidth()/2 - nameLayout2.width/2, nameTagSprite2.getY() + nameTagSprite2.getHeight()/2 - nameLayout2.height);
+        Label playerNameLabel2 = new Label(preferences.getString("opponentName"), UIConstants.labelStyle);
+        playerNameLabel2.setColor(new Color(0xFF3030FF));
+        playerNameLabel2.setFontScale(labelScale);
+        playerNameLabel2.setBounds(nameTagSprite2.getX(), nameTagSprite2.getY(), nameTagSprite2.getWidth(), nameTagSprite2.getHeight());
+        playerNameLabel2.setAlignment(Align.center);
         stage.addActor(playerNameLabel2);
     }
 
