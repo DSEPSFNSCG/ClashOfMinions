@@ -27,7 +27,7 @@ Client -> Server
     "position": [3,5],
     "stats": {
       "health" : 4,
-      
+
       "boosthealrange" : 3, (not implemented right now, but coming)
       "attackrange" : 2, (same)
       "attackdmg" : 2, (same)
@@ -85,7 +85,8 @@ Client -> Server
         "attackrange" : 2,
         "health" : 4,
         "attackdmg" : 2,
-        "healstrength" : 1,
+        "healstrength" : 1
+      }
     },
     {
       "position": [3,5],
@@ -94,7 +95,8 @@ Client -> Server
         "attackrange" : 2,
         "health" : 4,
         "attackdmg" : 2,
-        "healstrength" : 1,
+        "healstrength" : 1
+      }
     },
   ]
 }
