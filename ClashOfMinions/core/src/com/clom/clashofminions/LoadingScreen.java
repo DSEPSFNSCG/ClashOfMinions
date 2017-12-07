@@ -141,7 +141,8 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         if (gameRunning)
         {
             String token = preferences.getString("gameToken", "");
-            connectionHandler.restoreGame(token);
+            int gameId = preferences.getInteger("gameId", 0);
+            connectionHandler.restoreGame(token, gameId);
         }
         else
         {
@@ -169,11 +170,12 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
 
 
     @Override
-    public void gameFound(String token, String opponentName, Boolean isFirstPlayer) {
+    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer) {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", true);
         preferences.putBoolean("isFirstPlayer", isFirstPlayer);
         preferences.putString("gameToken", token);
+        preferences.putInteger("gameId", gameId);
         preferences.putString("opponentName", opponentName);
         preferences.flush();
 

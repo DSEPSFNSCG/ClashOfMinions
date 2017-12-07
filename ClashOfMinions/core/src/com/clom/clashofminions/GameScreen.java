@@ -437,7 +437,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     }
 
     @Override
-    public void gameFound(String token, String opponentName, Boolean isFirstPlayer) {
+    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer) {
 
     }
 

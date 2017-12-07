@@ -23,7 +23,7 @@ public class AIConnectionHandler implements ConnectionHandler {
             public void run() {
                 if (delegate != null)
                 {
-                    delegate.gameFound("lol", "Mallory", true);
+                    delegate.gameFound("lol", 1, "Mallory", true);
                 }
             }
         }, 2.0f);
@@ -35,7 +35,7 @@ public class AIConnectionHandler implements ConnectionHandler {
     }
 
     @Override
-    public void restoreGame(String token) {
+    public void restoreGame(String token, int gameId) {
         Timer.schedule(new Timer.Task(){
             @Override
             public void run() {
