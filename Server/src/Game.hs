@@ -21,18 +21,19 @@ import           System.Random           (RandomGen, random, randomIO)
 import           Types
 
 
-makePlayer :: RandomGen g => g -> Client -> String -> STM (Player, g)
-makePlayer g client name = do
+makePlayer :: RandomGen g => g -> Bool -> Client -> String -> STM (Player, g)
+makePlayer g left client name = do
   let (token, g') = random g
   clientVar <- newTVar $ Just client
   return $ (MkPlayer { playerClient = clientVar
                     , playerName = name
-                    , playerToken = token }, g')
+                    , playerToken = token
+                    , leftPlayer = left }, g')
 
 makeGame :: RandomGen g => g -> Int -> (Client, String) -> (Client, String) -> STM (Game, g)
 makeGame g gid (c, n) (c', n') = do
-  (p, g') <- makePlayer g c n
-  (p', g'') <- makePlayer g' c' n'
+  (p, g') <- makePlayer g True c n
+  (p', g'') <- makePlayer g' False c' n'
   let (p1Starts, g''') = random g''
   let state = uncurry initialGameState $ if p1Starts then (p, p') else (p', p)
 
@@ -97,11 +98,15 @@ anounceStart game = do
   _ <- playerSend p $ GameStart { f_gameId = (gameId game)
                                 , f_youStart = True
                                 , f_otherName = playerName p'
-                                , f_token = playerToken p }
+                                , f_token = playerToken p
+                                , f_left = leftPlayer p
+                                }
   _ <- playerSend p' $ GameStart { f_gameId = (gameId game)
                                  , f_youStart = False
                                  , f_otherName = playerName p
-                                 , f_token = playerToken p' }
+                                 , f_token = playerToken p'
+                                 , f_left = leftPlayer p'
+                                 }
   return ()
 
 
@@ -143,7 +148,7 @@ gameLoop game = do
     state <- readTVar (gameState game)
     return (player, event, state)
 
-  newState <- gameTransition state player event
+  newState <- gameTransition game state player event
 
   atomically $ writeTVar (gameState game) newState
   gameLoop game
