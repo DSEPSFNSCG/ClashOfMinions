@@ -11,6 +11,6 @@ in with import nixpkgs {};
 
 haskell.lib.buildStackProject {
   name = "Test";
-  src = ./.;
+  src = lib.cleanSource ./.;
   buildInputs = [ ];
 }
