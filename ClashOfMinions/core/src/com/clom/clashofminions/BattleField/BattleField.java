@@ -31,6 +31,8 @@ public class BattleField extends Group {
 
     public MinionNode floatingMinion;
 
+    public volatile int turnCount = 0;
+
     float tileWidth;
     float tileHeight;
 
@@ -231,6 +233,7 @@ public class BattleField extends Group {
 
     public void placeMinion(MinionNode minionNode, Boolean animated)
     {
+        ++turnCount;
         if (battleFieldLogic.gameOver) return;
         if (animationsRunning)
         {

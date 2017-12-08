@@ -167,6 +167,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         {
             String token = preferences.getString("gameToken", "");
             int gameId = preferences.getInteger("gameId", 0);
+            System.out.println("Restoring from main menu");
             connectionHandler.restoreGame(token, gameId);
         }
         else
@@ -233,5 +234,9 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         GameScreen gameScreen = new GameScreen(game, connectionHandler);
         gameScreen.restoredGame(xs, ys, valuesArray);
         game.setScreen(gameScreen);
+    }
+
+    public int historyStored(){
+      return 0;
     }
 }

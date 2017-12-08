@@ -29,6 +29,7 @@ import com.clom.clashofminions.Nodes.SliderNode;
 import com.clom.clashofminions.Nodes.SliderType;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -58,6 +59,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     ManaBarNode manaBarNode;
 
+    static boolean attemptturn;
+    AtomicBoolean waitingForServer = new AtomicBoolean(false);
     BattleField battleField;
 
     Group pauseMenuGroup;
@@ -146,8 +149,10 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             @Override
             public void clicked(InputEvent event, float x, float y)
             {
-                System.out.println("Turn");
-                placeAction();
+                if(waitingForServer.compareAndSet(false, true)){
+                    System.out.println("Turn");
+                    placeAction();
+                }
             }
         });
     }
@@ -449,7 +454,15 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     @Override
     public void receivedMove(int x, int y, int[] values) {
-        placeReceivedMinion(x, y, values, false, true);
+        attemptturn = true;
+        synchronized(this) {
+          if(!attemptturn){
+            return;
+          }
+          placeReceivedMinion(x, y, values, false, true);
+          waitingForServer.set(false);
+        }
+
     }
 
     @Override
@@ -458,9 +471,12 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     }
 
     @Override
-    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
+    public synchronized void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
+        waitingForServer.set(true);
+        attemptturn = false;
         int turns = xs.length;
 
+        battleField.turnCount = 0;
         for (int i = 0; i < turns; i++)
         {
             int x = xs[i];
@@ -468,6 +484,10 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             int[] values = valuesArray[i];
             placeReceivedMinion(x, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
         }
+        waitingForServer.set(false);
+    }
 
+    public int historyStored(){
+      return battleField.turnCount;
     }
 }

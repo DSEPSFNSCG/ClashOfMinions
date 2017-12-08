@@ -15,4 +15,6 @@ public interface ConnectionHandlerDelegate {
     void quitAction();
 
     void restoredGame(int[] xs, int[] ys, int[][] valuesArray);
+
+    int historyStored();
 }
