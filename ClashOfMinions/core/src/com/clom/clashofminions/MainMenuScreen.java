@@ -1,6 +1,7 @@
 package com.clom.clashofminions;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -61,7 +62,10 @@ public class MainMenuScreen implements Screen {
             public void clicked(InputEvent event, float x, float y)
             {
                 System.out.println("Play");
-                game.setScreen(new LoadingScreen(game));
+                Preferences preferences = Gdx.app.getPreferences("UserData");
+                String name = preferences.getString("userName", "");
+                String address = preferences.getString("serverAddress", "infinisil.com:8081");
+                game.setScreen(new LoadingScreen(game,address));
             }
         });
 

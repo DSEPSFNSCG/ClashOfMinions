@@ -17,7 +17,13 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.clom.clashofminions.Connection.ConnectionHandler;
 import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
 import com.clom.clashofminions.Connection.AIConnectionHandler;
+import com.clom.clashofminions.Connection.ServerConnectionHandler;
 import com.clom.clashofminions.Nodes.ButtonNode;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Scanner;
 
 /**
  * Created by greensn on 08.11.17.
@@ -28,13 +34,15 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
     final ClashOfMinions game;
 
     ConnectionHandler connectionHandler;
+    InetAddress address;
+    int port;
 
     Stage stage;
     Table table;
 
     float loadingTime = 0;
 
-    LoadingScreen(final ClashOfMinions game)
+    LoadingScreen(final ClashOfMinions game, final String address)
     {
         this.game = game;
 
@@ -77,9 +85,21 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         });
 
         Gdx.input.setInputProcessor(stage);
-
-        //Connect to server
-        connectToServer();
+        Scanner s = new Scanner(address);
+        s.useDelimiter(":");
+        try {
+          String a = s.next();
+          this.address = InetAddress.getByName("10.2.44.84");
+          s.useDelimiter("");
+          s.next();
+          this.port = 8081;// Integer.valueOf(s.nextLine());
+          //Connect to server
+          connectToServer();
+        } catch (UnknownHostException e) {
+          return; //TODO: show error?
+        } catch (IOException e){
+          return;
+        }
     }
 
     @Override
@@ -128,14 +148,14 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         //if (loadingTime > 0.1) enterGame();
     }
 
-    private void connectToServer()
+    private void connectToServer() throws IOException
     {
         System.out.println("Connecting...");
         Preferences preferences = Gdx.app.getPreferences("UserData");
         String name = preferences.getString("userName", "");
         Boolean gameRunning = preferences.getBoolean("gameRunning", false);
 
-        connectionHandler = new AIConnectionHandler();
+        connectionHandler = new ServerConnectionHandler(address,port,name);
         connectionHandler.setDelegate(this);
 
         if (gameRunning)

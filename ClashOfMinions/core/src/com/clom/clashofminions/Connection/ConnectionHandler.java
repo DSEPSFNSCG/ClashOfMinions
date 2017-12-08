@@ -1,5 +1,7 @@
 package com.clom.clashofminions.Connection;
 
+import java.io.IOException;
+
 /**
  * Created by greensn on 04.12.17.
  */
@@ -8,7 +10,7 @@ public interface ConnectionHandler {
 
     void setDelegate(ConnectionHandlerDelegate delegate);
 
-    void searchGame(String name);
+    void searchGame(String name) throws IOException;
     void cancelSearchingGame();
 
     void restoreGame(String token, int gameId);
