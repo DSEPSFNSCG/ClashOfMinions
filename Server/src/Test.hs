@@ -59,6 +59,3 @@ sendClient :: ToJSON r => Handle -> r -> IO ()
 sendClient handle r = hPutStrLn handle $ toStrict $ encode r
 
 
-s = MkStats { f_health = 0, f_boosthealrange = 0, f_attackrange = 0, f_attackdmg = 0, f_healstrength = 0 }
-
-p = \x -> Place $ MkPlacement { f_position = (x, 3), f_stats = s }

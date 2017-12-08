@@ -44,11 +44,14 @@ data GameEvent = PlayerDisconnect
 
 
 
-data Stats = MkStats { f_health         :: Int
-                     , f_boosthealrange :: Int
-                     , f_attackrange    :: Int
-                     , f_attackdmg      :: Int
-                     , f_healstrength   :: Int
+data Stats = MkStats { f_attackdmg   :: Int
+                     , f_attackrange :: Int
+                     , f_buffrange   :: Int
+                     , f_healing     :: Int
+                     , f_atkbuff     :: Int
+                     , f_healbuff    :: Int
+                     , f_shield      :: Int
+                     , f_maxhealth   :: Int
                      }
              deriving (Generic, Show)
 

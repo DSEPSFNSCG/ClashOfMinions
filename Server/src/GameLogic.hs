@@ -41,14 +41,20 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
       r = snd p + 1
       conditions =
         [ if leftPlayer player then
-            (0 < c && c <= 4, "X must be between 1 and 4") else
-            (6 < c && c <= 10, "X must be between 7 and 10")
-        , (0 < r && r <= 4, "Y must be between 1 and 4")
-        , (f_health s < 10, "health must be below 10")
-        , (f_boosthealrange s < 10, "boostrange must be below 10")
-        , (f_attackrange s < 10, "attackrange must be below 10")
-        , (f_attackdmg s < 10, "attackdmg must be below 10")
-        , (f_healstrength s < 10, "healstrength must be below 10")
+            (0 < c && c <= 4, "X must be between 0 and 3") else
+            (6 < c && c <= 10, "X must be between 6 and 9")
+        , (0 < r && r <= 4, "Y must be between 0 and 3")
+        , (f_attackdmg s < 5 , "You cheater!")
+        , (f_attackrange s < 4, "You cheater!")
+        , (f_buffrange s < 4 , "You cheater!")
+        , (f_healing s < 5, "You cheater!")
+        , (f_atkbuff s < 5, "You cheater!")
+        , (f_healbuff s < 5, "You cheater!")
+        , (f_shield s < 5, "You cheater!")
+        , (f_maxhealth s < 5, "You cheater!")
+
+        , (f_attackdmg s + f_attackrange s + f_buffrange s + f_healing s + f_atkbuff s + f_healbuff s + f_shield s + f_maxhealth s < 5, "Too many points!")
+
         , (getElem r c (field state) == Nothing, "field is already occupied")
         ]
 
