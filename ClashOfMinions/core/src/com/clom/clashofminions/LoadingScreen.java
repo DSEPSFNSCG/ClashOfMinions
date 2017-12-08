@@ -89,10 +89,10 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         s.useDelimiter(":");
         try {
           String a = s.next();
-          this.address = InetAddress.getByName("10.2.44.84");
+          this.address = InetAddress.getByName(a);
           s.useDelimiter("");
           s.next();
-          this.port = 8081;// Integer.valueOf(s.nextLine());
+          this.port = Integer.valueOf(s.nextLine());
           //Connect to server
           connectToServer();
         } catch (UnknownHostException e) {
@@ -148,15 +148,20 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         //if (loadingTime > 0.1) enterGame();
     }
 
-    private void connectToServer() throws IOException
+    private void connectToServer()
     {
         System.out.println("Connecting...");
         Preferences preferences = Gdx.app.getPreferences("UserData");
-        String name = preferences.getString("userName", "");
+        String name = preferences.getString("userName", "Bob");
         Boolean gameRunning = preferences.getBoolean("gameRunning", false);
 
+      try {
         connectionHandler = new ServerConnectionHandler(address,port,name);
-        connectionHandler.setDelegate(this);
+      } catch (IOException e) {
+        closeServerConnection();
+        return; // TODO: Error Message;
+      }
+      connectionHandler.setDelegate(this);
 
         if (gameRunning)
         {
@@ -166,8 +171,16 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         }
         else
         {
+          try {
             connectionHandler.searchGame(name);
+          } catch (IOException e) {
+            closeServerConnection(); //TODO: Error Message;
+          }
         }
+    }
+
+    public void quitAction(){
+      closeServerConnection();
     }
 
     private void closeServerConnection()
@@ -177,8 +190,11 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", false);
         preferences.flush();
+        try {
+            connectionHandler.cancelSearchingGame();
+        }catch(IOException e){
 
-        connectionHandler.cancelSearchingGame();
+        }
         game.setScreen(new MainMenuScreen(game));
     }
 

@@ -28,6 +28,8 @@ import com.clom.clashofminions.Nodes.ManaBarNode;
 import com.clom.clashofminions.Nodes.SliderNode;
 import com.clom.clashofminions.Nodes.SliderType;
 
+import java.io.IOException;
+
 
 /**
  * Created by greensn on 08.11.17.
@@ -339,9 +341,12 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         }
     }
 
-    private void quitAction()
+    public void quitAction()
     {
-        connectionHandler.quitGame();
+        try {
+            connectionHandler.quitGame();
+        }catch(IOException e){
+        }
         returnToMainMenu();
     }
 
@@ -356,7 +361,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     private void placeAction()
     {
-        if (!battleField.battleFieldLogic.isLeftPlayerTurn || battleField.animationsRunning) return;
+        Preferences preferences = Gdx.app.getPreferences("UserData");
+        if (battleField.battleFieldLogic.isLeftPlayerTurn != preferences.getBoolean("isFirstPlayer") || battleField.animationsRunning) return;
         updateMinionStats();
         sendFloatingMinion();
         battleField.placeFloatingMinion();

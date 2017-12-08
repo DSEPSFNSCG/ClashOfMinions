@@ -11,12 +11,12 @@ public interface ConnectionHandler {
     void setDelegate(ConnectionHandlerDelegate delegate);
 
     void searchGame(String name) throws IOException;
-    void cancelSearchingGame();
+    void cancelSearchingGame() throws IOException;
 
     void restoreGame(String token, int gameId);
 
     void sendMove(int x, int y, int[] values);
 
-    void quitGame();
+    void quitGame() throws IOException;
 
 }

@@ -63,7 +63,7 @@ public class MainMenuScreen implements Screen {
             {
                 System.out.println("Play");
                 Preferences preferences = Gdx.app.getPreferences("UserData");
-                String name = preferences.getString("userName", "");
+                String name = preferences.getString("userName", "Bob");
                 String address = preferences.getString("serverAddress", "infinisil.com:8081");
                 game.setScreen(new LoadingScreen(game,address));
             }

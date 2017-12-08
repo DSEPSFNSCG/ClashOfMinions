@@ -36,7 +36,7 @@ public class SettingsScreen implements Screen {
 
         //Preferences
         preferences = Gdx.app.getPreferences("UserData");
-        String name = preferences.getString("userName", "");
+        String name = preferences.getString("userName", "Bob");
         String address = preferences.getString("serverAddress", "infinisil.com:8081");
 
         stage = new Stage(new StretchViewport(ClashOfMinions.WIDTH, ClashOfMinions.HEIGHT));

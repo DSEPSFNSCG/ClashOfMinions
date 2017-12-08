@@ -12,5 +12,7 @@ public interface ConnectionHandlerDelegate {
 
     void opponentQuit();
 
+    void quitAction();
+
     void restoredGame(int[] xs, int[] ys, int[][] valuesArray);
 }
