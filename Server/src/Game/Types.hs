@@ -31,6 +31,7 @@ data GameResponse = PlaceSuccess
                   | InvalidGameRequest
                   | LogResponse String
                   | NotYourTurn
+                  | GameOver { f_won :: Bool}
                   | GameStart { f_gameId    :: Int
                               , f_youStart  :: Bool
                               , f_otherName :: String
@@ -75,6 +76,8 @@ data GameState = MkGameState { history       :: History
                              , waitingPlayer :: Player
                              , nextMinionId  :: Int
                              }
+                  | GameDone { winningPlayer :: Player
+                              ,loosingPlayer :: Player}
                  deriving (Show)
 
 simpleShow :: GameState -> String
