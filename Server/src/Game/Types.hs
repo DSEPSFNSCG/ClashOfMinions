@@ -37,7 +37,7 @@ data GameResponse = PlaceSuccess
                               , f_youStart  :: Bool
                               , f_otherName :: String
                               , f_token     :: Token
-                              , f_left      :: Bool}
+                              }
                     deriving (Generic, Show)
 
 invalidGameRequest = InvalidGameRequest

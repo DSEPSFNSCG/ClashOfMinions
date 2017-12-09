@@ -38,9 +38,9 @@ makePlayer g left client name = do
 
 makeGame :: RandomGen g => g -> Int -> (Client, String) -> (Client, String) -> STM (Game, g)
 makeGame g gid (c, n) (c', n') = do
-  (p, g') <- makePlayer g True c n
-  (p', g'') <- makePlayer g' False c' n'
-  let (p1Starts, g''') = random g''
+  let (p1Starts, g') = random g
+  (p, g'') <- makePlayer g' p1Starts c n
+  (p', g''') <- makePlayer g'' (not p1Starts) c' n'
   let state = uncurry initialGameState $ if p1Starts then (p, p') else (p', p)
 
   tqueue <- newTQueue
@@ -105,13 +105,11 @@ anounceStart game = do
                                 , f_youStart = True
                                 , f_otherName = playerName p'
                                 , f_token = playerToken p
-                                , f_left = leftPlayer p
                                 }
   _ <- playerSend p' $ GameStart { f_gameId = (gameId game)
                                  , f_youStart = False
                                  , f_otherName = playerName p
                                  , f_token = playerToken p'
-                                 , f_left = leftPlayer p'
                                  }
   return ()
 
