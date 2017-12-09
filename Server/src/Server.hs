@@ -15,6 +15,7 @@ import           Control.Exception               (SomeException, handle)
 import           Control.Monad.STM.Class
 import           Control.Monad.Trans.Writer.Lazy (runWriterT, tell)
 import           Data.Aeson
+import           Data.ByteString.Lazy            (fromStrict, toStrict)
 import           Data.Maybe                      (fromMaybe, listToMaybe)
 import           Network                         (PortID, listenOn)
 import qualified Network.Socket                  as S
@@ -61,10 +62,11 @@ acceptConnections queue socket nextId = do
   (clientSocket, _) <- S.accept socket
   handle <- S.socketToHandle clientSocket ReadWriteMode
   hSetBuffering handle LineBuffering
+  putStrLn $ "Client " ++ show nextId ++ " connected!"
   forkIO $ handleClient queue handle nextId
   acceptConnections queue socket $ nextId + 1
 
-loop :: (FromJSON q, ToJSON r) => Server -> ByteQueue -> r -> (a -> IO ()) -> (Server -> ServerState -> Client -> Maybe q -> TransResult r a) -> IO ()
+loop :: (FromJSON q, ToJSON r, ToJSON q) => Server -> ByteQueue -> r -> (a -> IO ()) -> (Server -> ServerState -> Client -> Maybe q -> TransResult r a) -> IO ()
 loop server queue invalid g f = do
   (client, result, log) <- atomically $ do
     (client, req) <- getRequest queue
@@ -73,7 +75,7 @@ loop server queue invalid g f = do
         state <- readTVar (serverStateVar server)
         ((newState, result), log) <- runWriterT $ f server state client r
         writeTVar (serverStateVar server) newState
-        return (client, result, log)
+        return (client, result, "Client sent request " ++ show (toStrict $ encode r) ++ "\n\t" ++ log)
       Nothing -> do
         return (client, Just (Left invalid), "Invalid request")
 
