@@ -12,10 +12,10 @@ Server -> Client
 ```json
 {
   "type" : "gameStart",
-  "otherPlayername" : "betty",
-  "canStart" : true,
+  "otherName" : "betty",
+  "youStart" : true,
   "gameId" : 1,
-  "token" : 562234672464201 (64-bit unsigned integer)
+  "token" : "caohlurcdailcga"
 }
 ```
 
@@ -26,12 +26,14 @@ Client -> Server
   "contents": {
     "position": [3,5],
     "stats": {
-      "health" : 4,
-
-      "boosthealrange" : 3, (not implemented right now, but coming)
-      "attackrange" : 2, (same)
-      "attackdmg" : 2, (same)
-      "healstrength" : 1, (same)
+      "attackdmg":0,
+      "attackrange":0,
+      "buffrange":0,
+      "healing":0,
+      "atkbuff":0,
+      "healbuff":0,
+      "shield":0,
+      "maxhealth":0
     }
   }
 }
@@ -47,15 +49,18 @@ Server -> Client
 Server -> other Client
 ```json
 {
-  "type" : "placement";
-  "contents": {
-    "position": [3,5],
-    "stats": {
-      "health" : 4,
-      "boosthealrange" : 3,
-      "attackrange" : 2,
-      "attackdmg" : 2,
-      "healstrength" : 1,
+  "type":"otherPlayerPlaced",
+  "contents":{
+    "position":[7,3],
+    "stats":{
+      "attackdmg":0,
+      "attackrange":0,
+      "buffrange":0,
+      "healing":0,
+      "atkbuff":0,
+      "healbuff":0,
+      "shield":0,
+      "maxhealth":0
     }
   }
 }
