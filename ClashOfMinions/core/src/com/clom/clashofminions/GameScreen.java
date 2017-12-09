@@ -59,7 +59,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     ManaBarNode manaBarNode;
 
-    static boolean attemptturn;
+    static AtomicBoolean attemptturn = new AtomicBoolean(false);
     AtomicBoolean waitingForServer = new AtomicBoolean(false);
     BattleField battleField;
 
@@ -454,9 +454,9 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     @Override
     public void receivedMove(int x, int y, int[] values) {
-        attemptturn = true;
+        attemptturn.set(true);
         synchronized(this) {
-          if(!attemptturn){
+          if(!attemptturn.get()){
             return;
           }
           placeReceivedMinion(x, y, values, false, true);
@@ -480,7 +480,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     @Override
     public synchronized void restoredGame(int[] xs, int[] ys, int[][] valuesArray, boolean fromStart) {
         waitingForServer.set(true);
-        attemptturn = false;
+        attemptturn.set(false);
         int turns = xs.length;
 
         if(fromStart){
