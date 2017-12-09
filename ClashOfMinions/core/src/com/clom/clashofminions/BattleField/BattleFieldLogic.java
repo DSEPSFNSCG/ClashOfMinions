@@ -35,10 +35,11 @@ public class BattleFieldLogic {
      * @param width width of the field in squares
      * @param height height of the field in squares
      */
-    public BattleFieldLogic(int width, int height){
+    public BattleFieldLogic(int width, int height, boolean leftPlayerStart){
         this.width = width;
         this.height = height;
         field = new MinionNode[width][height];
+        isLeftPlayerTurn = leftPlayerStart;
     }
 
     /**
@@ -371,7 +372,7 @@ public class BattleFieldLogic {
   /**
    *  Call to restart the game
    */
-    public void reset(){
+    public void reset(Boolean leftPlayerStart){
         leftPlayerMinions.clear();
         rightPlayerMinions.clear();
         gameOver = false;
@@ -380,7 +381,7 @@ public class BattleFieldLogic {
             field[i][j] = null;
           }
         }
-        isLeftPlayerTurn = true;
+        isLeftPlayerTurn = leftPlayerStart;
     }
 
     public static class Event{

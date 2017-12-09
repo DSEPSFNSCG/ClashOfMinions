@@ -192,7 +192,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         battleField.setPosition(UIConstants.battleFieldPositionX * stage.getWidth(), UIConstants.battleFieldPositionY * stage.getHeight());
         stage.addActor(battleField);
         battleField.setup();
-        battleField.battleFieldLogic.isLeftPlayerTurn = preferences.getBoolean("isFirstPlayer", true);
+        battleField.battleFieldLogic.isLeftPlayerTurn = !(preferences.getBoolean("isFirstPlayer")^preferences.getBoolean("isLeftPlayer"));
 
         Image nameTagSprite = new Image(nameTagTexture);
         nameTagSprite.setWidth(UIConstants.nameTagWidth * stage.getWidth());
@@ -367,9 +367,13 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     private void placeAction()
     {
         Preferences preferences = Gdx.app.getPreferences("UserData");
-        if (battleField.battleFieldLogic.isLeftPlayerTurn != preferences.getBoolean("isFirstPlayer") || battleField.animationsRunning) return;
+
+        if (battleField.battleFieldLogic.isLeftPlayerTurn != preferences.getBoolean("isLeftPlayer") || battleField.animationsRunning) return;
+        System.out.println("queueplacement");
         battleField.queuePlacement();
+        System.out.println("updatestats");
         updateMinionStats();
+        System.out.println("send minion");
         sendFloatingMinion();
     }
 
@@ -443,12 +447,12 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         }
         else
         {
-            connectionHandler.sendMove(-1, -1, null);
+            //connectionHandler.sendMove(-1, -1, null);
         }
     }
 
     @Override
-    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer) {
+    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer, Boolean isLeftPlayer) {
 
     }
 
@@ -483,8 +487,9 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         attemptturn.set(false);
         int turns = xs.length;
 
+      Preferences preferences = Gdx.app.getPreferences("UserData");
         if(fromStart){
-          battleField.reset();
+          battleField.reset(!(preferences.getBoolean("isStartingPlayer")^preferences.getBoolean("isLeftPlayer")));
           battleField.turnCount = 0;
         }
         for (int i = 0; i < turns; i++)
@@ -494,8 +499,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             int[] values = valuesArray[i];
             placeReceivedMinion(x, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
         }
-        Preferences preferences = Gdx.app.getPreferences("UserData");
-        if(preferences.getBoolean("isFirstPlayer") == battleField.battleFieldLogic.isLeftPlayerTurn){
+        if(!preferences.getBoolean("isFirstPlayer")){
           waitingForServer.set(false);
         }
     }

@@ -19,6 +19,7 @@ import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
 import com.clom.clashofminions.Connection.AIConnectionHandler;
 import com.clom.clashofminions.Connection.ServerConnectionHandler;
 import com.clom.clashofminions.Nodes.ButtonNode;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -203,13 +204,14 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
 
 
     @Override
-    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer) {
+    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer, Boolean isLeftPlayer) {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", true);
         preferences.putBoolean("isFirstPlayer", isFirstPlayer);
         preferences.putString("gameToken", token);
         preferences.putInteger("gameId", gameId);
         preferences.putString("opponentName", opponentName);
+        preferences.putBoolean("isLeftPlayer", isLeftPlayer);
         preferences.flush();
         enterGame();
     }

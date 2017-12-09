@@ -6,7 +6,7 @@ package com.clom.clashofminions.Connection;
 
 public interface ConnectionHandlerDelegate {
 
-    void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer);
+    void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer, Boolean isLeftPlayer);
 
     void receivedMove(int x, int y, int[] values);
 

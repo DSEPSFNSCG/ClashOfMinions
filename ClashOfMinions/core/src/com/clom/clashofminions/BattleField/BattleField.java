@@ -1,6 +1,7 @@
 package com.clom.clashofminions.BattleField;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
@@ -46,7 +47,9 @@ public class BattleField extends Group {
     public BattleField(GameScreen game)
     {
         this.game = game;
-        battleFieldLogic = new BattleFieldLogic(UIConstants.battleFieldTilesHorizontal,UIConstants.battleFieldTilesVertical);
+        Preferences preferences = Gdx.app.getPreferences("UserData");
+        battleFieldLogic = new BattleFieldLogic(UIConstants.battleFieldTilesHorizontal,UIConstants.battleFieldTilesVertical,
+          !(preferences.getBoolean("isLeftPlayer") ^ preferences.getBoolean("isFirstPlayer")));
     }
 
     public void setup()
@@ -231,6 +234,10 @@ public class BattleField extends Group {
     public synchronized void queuePlacement(){
         if(waitingForConfirm.compareAndSet(false,true)) {
             storedMinion = floatingMinion;
+            if(storedMinion == null){
+                waitingForConfirm.set(false);
+                System.out.println("No minion assigned");
+            }
         }
     }
 
@@ -490,10 +497,10 @@ public class BattleField extends Group {
         }
     }
 
-    public void reset(){
+    public void reset(Boolean leftPlayerStart){
         //TODO: confirm this resets the battlefield without memory leaks or other issues
         this.clearChildren();
         this.clearActions();
-        battleFieldLogic.reset();
+        battleFieldLogic.reset(leftPlayerStart);
     }
 }
