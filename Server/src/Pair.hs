@@ -16,7 +16,7 @@ import           Types
 pairingTrans :: Server -> ServerState -> Client -> Maybe LobbyRequest -> TransResult LobbyResponse ()
 
 pairingTrans srv s@(ServerState { inQueue = Just (c', _) }) c r = case c == c' of
-  True  -> do
+  True -> do
     let newState = s { inQueue = Nothing }
     case r of
       Nothing -> do

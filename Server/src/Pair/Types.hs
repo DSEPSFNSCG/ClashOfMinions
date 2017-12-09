@@ -9,9 +9,11 @@ data LobbyRequest = Unqueue
                     deriving (Generic, Show)
 
 data LobbyResponse = Unqueued
-                   | InvalidPairingRequest
+                   | InvalidPairingRequest { validPairingRequests :: [LobbyRequest] }
                      deriving (Generic, Show)
 
+invalidPairingRequest = invalidPairingRequest { validPairingRequests =
+                                                [ Unqueue ] }
 
 instance FromJSON LobbyRequest where
   parseJSON = genericParseJSON customOptions

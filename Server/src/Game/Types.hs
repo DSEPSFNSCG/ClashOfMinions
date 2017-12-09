@@ -27,9 +27,10 @@ data Placement = MkPlacement { f_position :: (Int, Int)
                  deriving (Generic, Show)
 
 data GameResponse = PlaceSuccess
+                  | OtherPlayerPlaced Placement
                   | InvalidPlacing String
-                  | InvalidGameRequest
-                  | LogResponse String
+                  | InvalidGameRequest { validGameRequests :: [GameRequest] }
+                  | GameLogResponse String
                   | NotYourTurn
                   | GameOver { f_won :: Bool}
                   | GameStart { f_gameId    :: Int
@@ -38,6 +39,23 @@ data GameResponse = PlaceSuccess
                               , f_token     :: Token
                               , f_left      :: Bool}
                     deriving (Generic, Show)
+
+invalidGameRequest = InvalidGameRequest
+  { validGameRequests =
+    [ Place $ MkPlacement
+      { f_position = (0, 3)
+      , f_stats = MkStats { f_attackdmg = 0
+                          , f_attackrange = 0
+                          , f_buffrange = 0
+                          , f_healing = 0
+                          , f_atkbuff = 0
+                          , f_healbuff = 0
+                          , f_shield = 0
+                          , f_maxhealth = 0 }
+      }
+    ]
+  }
+
 
 data GameEvent = PlayerDisconnect
                | PlayerRequest GameRequest
@@ -76,8 +94,8 @@ data GameState = MkGameState { history       :: History
                              , waitingPlayer :: Player
                              , nextMinionId  :: Int
                              }
-                  | GameDone { winningPlayer :: Player
-                              ,loosingPlayer :: Player}
+               | GameDone { winningPlayer :: Player
+                          , losingPlayer  :: Player }
                  deriving (Show)
 
 simpleShow :: GameState -> String
@@ -103,7 +121,7 @@ data Game = MkGame
   , gameQueue  :: GameQueue }
 
 
-type Token = Word64
+type Token = String
 data Player = MkPlayer { playerClient :: TVar (Maybe Client)
                        , playerName   :: String
                        , playerToken  :: Token

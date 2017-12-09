@@ -24,10 +24,12 @@ import           System.IO                       (Handle, hClose, hIsEOF)
 handleClient :: ByteQueue -> Handle -> Int -> IO ()
 handleClient queue handle cid = do
   queueVar <- atomically $ newTVar queue
-  clientRun $ MkClient { clientId = cid
+  let client =  MkClient { clientId = cid
                        , clientHandle = handle
                        , clientQueue = queueVar
                        }
+  sendResponse client $ WaitLogResponse { w_message = "Connected!" }
+  clientRun client
 
 clientReceive :: Client -> IO (Maybe ByteString)
 clientReceive client = do

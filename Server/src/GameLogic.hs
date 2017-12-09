@@ -2,11 +2,11 @@ module GameLogic where
 
 import           Client
 import           Control.Concurrent.STM (readTVarIO)
+import           Control.Monad
 import           Data.List
 import           Data.Matrix
-import qualified Data.Vector as V
+import qualified Data.Vector            as V
 import           Game.Types
-import           Control.Monad
 
 -- Tries to send a message to a player, returns False if the player is currently disconnected
 playerSend :: Player -> GameResponse -> IO Bool
@@ -28,20 +28,22 @@ initialGameState currentPlayer waitingPlayer =
               }
 
 
-simulate :: Bool -> Player -> Field -> Field
+simulate :: Bool -> Player -> Field -> Maybe Field
 simulate True player field = simulateLeft player field
-simulate False player field = turnField (simulateLeft player (turnField field))
+simulate False player field = fmap turnField . simulateLeft player . turnField $ field
 
 turnField :: Field -> Field
-turnField field = 
- let 
+turnField field =
+ let
    colsField = map (flip getCol field) [0..9]
    colsFieldReverse = reverse colsField
   in
-   matrix 4 10 $ \(r, c) -> V.unsafeIndex (colsFieldReverse !! c) r
+   matrix 4 10 $ \(r, c) -> V.unsafeIndex (colsFieldReverse !! (c - 1)) r
 
-simulateLeft :: Player -> Field -> Field
-simulateLeft player field = field -- TODO
+simulateLeft :: Player -> Field -> Maybe Field
+simulateLeft player field = do
+  moved <- doMovement player field
+  return moved
 
 doMovement :: Player -> Field -> Maybe Field
 doMovement player field = foldM (doColumnMovement player) field [9,8..0]
@@ -61,7 +63,7 @@ switchPlayers state@(MkGameState { currentPlayer = c, waitingPlayer = w }) =
         , waitingPlayer = c
         }
 
-doPlacement :: Game -> GameState -> Player -> Placement -> Either String (Maybe GameState)
+doPlacement :: Game -> GameState -> Player -> Placement -> Either String GameState
 doPlacement game state player placement@(MkPlacement { f_position = p, f_stats = s}) =
   let
       c = fst p + 1
@@ -94,12 +96,13 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
       newField = setElem (Just minion) (r, c) $ field state
   in case error of
     Just msg -> Left msg
-    Nothing -> Right $ fmap (\newSim -> switchPlayers $ state
-     { history = placement:(history state)
-     , field = newSim
-     , nextMinionId = (nextMinionId state) + 1
-     })
-     (simulate (leftPlayer player) player newField)
+    Nothing -> case simulate (leftPlayer player) player newField of
+      Nothing -> return $ GameDone { winningPlayer = player
+                                   , losingPlayer = (waitingPlayer state) }
+      Just newField' -> return $ switchPlayers $
+        state { history = placement:(history state)
+              , field = newField'
+              , nextMinionId = (nextMinionId state) + 1 }
 
 
 gameTransition :: Game -> GameState -> Player -> GameEvent -> IO GameState
@@ -114,30 +117,23 @@ gameTransition game gameState player (PlayerRequest (Place placement)) = do
       playerSend player $ InvalidPlacing error
       putStrLn $ "[GAME] Invalid placement: " ++ error
       return gameState
-    Right Nothing -> do 
-      playerSend player $ GameOver True
-      playerSend $ waitingPlayer gameState $ GameOver False
-      putStrLn $ "[GAME] Game Over!"
-
     Right newGameState -> do
       playerSend player $ PlaceSuccess
+      playerSend (waitingPlayer gameState) $ OtherPlayerPlaced placement
       putStrLn $ "[GAME] Successful placement!"
       putStrLn $ "[GAME] Gamestate is now: " ++ simpleShow newGameState
       --putStrLn $ "\n[GAME] Full Gamestate: " ++ show newGameState
       case newGameState of
-      	GameDone { loosingPlayer = lp } -> do 
-      	  playerSend player $ GameOver True
-          playerSend $ waitingPlayer gameState $ GameOver False
+        GameDone { losingPlayer = lp } -> do
+          putStrLn $ "[GAME] Game Over!"
+          playerSend player $ GameOver True
+          playerSend (waitingPlayer gameState) $ GameOver False
           return newGameState
-      	  -> return newGameState
-
-
-      putStrLn $ "[GAME] Game Over!"
-      return newGameState
+        _ -> return newGameState
 gameTransition game gameState player PlayerDisconnect = do
   putStrLn $ "[GAME] Player disconnected!"
   return gameState
 gameTransition game gameState player PlayerReconnect = do
   putStrLn $ "[GAME] Player reconnected!"
-  playerSend player $ LogResponse "You have been reconnected!"
+  playerSend player $ GameLogResponse "You have been reconnected!"
   return gameState

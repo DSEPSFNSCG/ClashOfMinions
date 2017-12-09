@@ -48,8 +48,18 @@ data WaitingResponse = Queued
                      | InvalidGameID
                      | TokenMismatch
                      | GameOver
-                     | InvalidWaitingRequest
+                     | InvalidWaitingRequest { validWaitingRequests :: [WaitingRequest] }
+                     | WaitLogResponse { w_message :: String }
                      deriving (Generic, Show)
+
+invalidWaitingRequest = InvalidWaitingRequest { validWaitingRequests =
+                                                [ NewGame { name = "Foobar" }
+                                                , RestoreGame $ RestoreGameRequest
+                                                  { g_gameId = 3
+                                                  , g_token = "450472606304"
+                                                  , g_historyFrom = Just 5 }
+                                                ]
+                                              }
 
 
 instance FromJSON WaitingRequest where

@@ -17,13 +17,19 @@ import           GameLogic
 import           GHC.Generics
 import qualified Network.Socket          as NS
 import           System.IO               (Handle, hClose, hIsEOF)
-import           System.Random           (RandomGen, random, randomIO)
+import           System.Random           (RandomGen, random, randomIO, randomR)
 import           Types
 
+randomToken :: RandomGen g => g -> Int -> (Token, g)
+randomToken g 0 = ([], g)
+randomToken g length =
+  let (c, g') = randomR ('a','z') g
+      (cs, g'') = randomToken g' (length - 1)
+  in (c : cs, g'')
 
 makePlayer :: RandomGen g => g -> Bool -> Client -> String -> STM (Player, g)
 makePlayer g left client name = do
-  let (token, g') = random g
+  let (token, g') = randomToken g 16
   clientVar <- newTVar $ Just client
   return $ (MkPlayer { playerClient = clientVar
                     , playerName = name
@@ -68,7 +74,7 @@ gameClientHandler game bytes queue = do
           writeTQueue queue (player, toGameEvent msg)
           return Nothing
         Nothing -> return $ Just $ do
-          sendResponse client InvalidGameRequest
+          sendResponse client invalidGameRequest
 
   fromMaybe (return ()) result
   gameClientHandler game bytes queue
@@ -128,7 +134,7 @@ restore game client token historyFrom = do
       writeTQueue (gameQueue game) (player, PlayerReconnect)
       state <- readTVar $ gameState game
       let all = history state
-      return $ Just $ take (fromMaybe 0 historyFrom) all
+      return $ Just $ drop (fromMaybe 0 historyFrom) (reverse all)
 
 playerForClient :: Game -> Client -> STM (Maybe Player)
 playerForClient game client = do

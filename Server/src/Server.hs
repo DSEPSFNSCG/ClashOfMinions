@@ -53,8 +53,8 @@ runOnSocket socket = do
                       , serverStateVar = stateVar
                       }
 
-  forkIO $ loop server initQueue InvalidWaitingRequest id waitingTrans
-  forkIO $ loop server waitQueue InvalidPairingRequest return pairingTrans
+  forkIO $ loop server initQueue invalidWaitingRequest id waitingTrans
+  forkIO $ loop server waitQueue invalidPairingRequest return pairingTrans
   acceptConnections initQueue socket 0
 
 acceptConnections :: ByteQueue -> S.Socket -> Int -> IO ()
@@ -68,6 +68,7 @@ acceptConnections queue socket nextId = do
 
 loop :: (FromJSON q, ToJSON r, ToJSON q) => Server -> ByteQueue -> r -> (a -> IO ()) -> (Server -> ServerState -> Client -> Maybe q -> TransResult r a) -> IO ()
 loop server queue invalid g f = do
+  putStrLn "Looping!"
   (client, result, log) <- atomically $ do
     (client, req) <- getRequest queue
     case req of
@@ -82,10 +83,16 @@ loop server queue invalid g f = do
   putStrLn $ "[SERVER] Client " ++ show client ++ ": " ++ log
 
   case result of
-    Nothing              -> return ()
-    Just (Left response) -> sendResponse client response
-    Just (Right a)       -> g a
-
+    Nothing              -> do
+      putStrLn $ "[SERVER] Result is Nothing!"
+      return ()
+    Just (Left response) -> do
+      putStrLn $ "[SERVER] Result is a response!"
+      forkIO $ sendResponse client response
+      putStrLn $ "[SERVER] Sent response"
+    Just (Right a)       -> do
+      putStrLn $ "[SERVER] Result is some action!"
+      g a
   loop server queue invalid g f
 
 
