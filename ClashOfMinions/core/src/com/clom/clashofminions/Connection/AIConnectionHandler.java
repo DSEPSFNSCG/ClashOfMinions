@@ -23,7 +23,7 @@ public class AIConnectionHandler implements ConnectionHandler {
             public void run() {
                 if (delegate != null)
                 {
-                    delegate.gameFound("lol", 1, "Mallory", true, true);
+                    delegate.gameFound("lol", 1, "Mallory", true);
                 }
             }
         }, 2.0f);

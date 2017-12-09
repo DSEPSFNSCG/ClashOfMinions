@@ -48,8 +48,7 @@ public class BattleField extends Group {
     {
         this.game = game;
         Preferences preferences = Gdx.app.getPreferences("UserData");
-        battleFieldLogic = new BattleFieldLogic(UIConstants.battleFieldTilesHorizontal,UIConstants.battleFieldTilesVertical,
-          !(preferences.getBoolean("isLeftPlayer") ^ preferences.getBoolean("isFirstPlayer")));
+        battleFieldLogic = new BattleFieldLogic(UIConstants.battleFieldTilesHorizontal,UIConstants.battleFieldTilesVertical);
     }
 
     public void setup()
@@ -198,7 +197,7 @@ public class BattleField extends Group {
             game.updateMinionStats();
         }
 
-        //System.out.println("Dragged minion to: " + coord);
+        System.out.println("Dragged minion to: " + coord);
 
         Vector2 newPosition = coordinatesToPosition(coord);
         floatingMinion.setPosition(newPosition.x, newPosition.y);
@@ -497,10 +496,10 @@ public class BattleField extends Group {
         }
     }
 
-    public void reset(Boolean leftPlayerStart){
+    public void reset(){
         //TODO: confirm this resets the battlefield without memory leaks or other issues
         this.clearChildren();
         this.clearActions();
-        battleFieldLogic.reset(leftPlayerStart);
+        battleFieldLogic.reset();
     }
 }

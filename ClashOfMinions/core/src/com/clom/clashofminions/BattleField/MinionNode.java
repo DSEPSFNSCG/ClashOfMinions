@@ -127,6 +127,6 @@ public class MinionNode extends Actor {
 
     @Override
     public String toString(){
-        return "MinionNode at " +  minion.yPos + ", " + minion.xPos;
+        return "MinionNode at " + minion.xPos + ", " + minion.yPos;
     }
 }

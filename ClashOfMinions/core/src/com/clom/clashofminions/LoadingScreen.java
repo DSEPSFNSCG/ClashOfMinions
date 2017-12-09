@@ -204,14 +204,13 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
 
 
     @Override
-    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer, Boolean isLeftPlayer) {
+    public void gameFound(String token, int gameId, String opponentName, Boolean isFirstPlayer) {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", true);
         preferences.putBoolean("isFirstPlayer", isFirstPlayer);
         preferences.putString("gameToken", token);
         preferences.putInteger("gameId", gameId);
         preferences.putString("opponentName", opponentName);
-        preferences.putBoolean("isLeftPlayer", isLeftPlayer);
         preferences.flush();
         enterGame();
     }
