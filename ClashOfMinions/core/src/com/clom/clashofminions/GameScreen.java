@@ -79,7 +79,10 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         setupBackground();
         setupBattleField();
         setupInterface();
-
+        Preferences preferences = Gdx.app.getPreferences("UserData");
+        if(!preferences.getBoolean("isFirstPlayer")){
+          waitingForServer.set(true);
+        }
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -348,11 +351,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     public void quitAction()
     {
-        try {
-            connectionHandler.quitGame();
-        }catch(IOException e){
-        }
-        returnToMainMenu();
+        connectionHandler.quitGame();
+        returnToMainMenu(); //TODO: does doing this repeatedly delete the old data? Or is this a memory leak?
     }
 
     public void returnToMainMenu()
@@ -368,21 +368,21 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         if (battleField.battleFieldLogic.isLeftPlayerTurn != preferences.getBoolean("isFirstPlayer") || battleField.animationsRunning) return;
+        battleField.queuePlacement();
         updateMinionStats();
         sendFloatingMinion();
-        battleField.placeFloatingMinion();
     }
 
     public void updateMinionStats()
     {
-        if (battleField.floatingMinion != null)
+        if (battleField.storedMinion != null)
         {
             for (SliderNode slider:sliders)
             {
-                battleField.floatingMinion.minion.setAttribute(slider.type.toString(), slider.getSliderValue());
+                battleField.storedMinion.minion.setAttribute(slider.type.toString(), slider.getSliderValue());
             }
-            battleField.floatingMinion.minion.setAttribute("MaxHealth", battleField.floatingMinion.minion.getAttribute("Health"));
-            battleField.floatingMinion.updateStats();
+            battleField.storedMinion.minion.setAttribute("MaxHealth", battleField.storedMinion.minion.getAttribute("Health"));
+            battleField.storedMinion.updateStats();
         }
     }
 
@@ -429,10 +429,10 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     void sendFloatingMinion()
     {
-        if (battleField.floatingMinion != null)
+        if (battleField.storedMinion != null)
         {
-            int x = battleField.floatingMinion.minion.xPos;
-            int y = battleField.floatingMinion.minion.xPos;
+            int x = battleField.storedMinion.minion.xPos;
+            int y = battleField.storedMinion.minion.xPos;
             int[] values = new int[8];
             for (int i = 0; i < 8; i++)
             {
@@ -470,13 +470,23 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         gameOver(true, true);
     }
 
+  /**
+   * Call to restore game, either from current state or from start of the game.
+   * @param xs x coordinates of turns
+   * @param ys y coordinates of turns
+   * @param valuesArray first index is turn, second index refers to stat types
+   * @param fromStart if true, will reset battlefield. Otherwise, will just do turns from where we are.
+   */
     @Override
-    public synchronized void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
+    public synchronized void restoredGame(int[] xs, int[] ys, int[][] valuesArray, boolean fromStart) {
         waitingForServer.set(true);
         attemptturn = false;
         int turns = xs.length;
 
-        battleField.turnCount = 0;
+        if(fromStart){
+          battleField.reset();
+          battleField.turnCount = 0;
+        }
         for (int i = 0; i < turns; i++)
         {
             int x = xs[i];
@@ -484,10 +494,21 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             int[] values = valuesArray[i];
             placeReceivedMinion(x, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
         }
-        waitingForServer.set(false);
+        Preferences preferences = Gdx.app.getPreferences("UserData");
+        if(preferences.getBoolean("isFirstPlayer") == battleField.battleFieldLogic.isLeftPlayerTurn){
+          waitingForServer.set(false);
+        }
     }
 
     public int historyStored(){
       return battleField.turnCount;
+    }
+
+    @Override
+    public void confirmMove(){
+        battleField.confirmPlacement();
+    }
+    public void rejectMove(){
+        battleField.rejectPlacement();
     }
 }

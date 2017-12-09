@@ -168,14 +168,14 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
             String token = preferences.getString("gameToken", "");
             int gameId = preferences.getInteger("gameId", 0);
             System.out.println("Restoring from main menu");
-            connectionHandler.restoreGame(token, gameId);
+            connectionHandler.restoreGame(token, gameId,0, true); //TODO: is turn data supposed to be stored in the battlefield or not?
         }
         else
         {
           try {
-            connectionHandler.searchGame(name);
+            connectionHandler.searchGame();
           } catch (IOException e) {
-            closeServerConnection(); //TODO: Error Message;
+            closeServerConnection(); //TODO: Show ErrorMessage to User
           }
         }
     }
@@ -191,11 +191,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", false);
         preferences.flush();
-        try {
-            connectionHandler.cancelSearchingGame();
-        }catch(IOException e){
-
-        }
+        connectionHandler.cancelSearchingGame();
         game.setScreen(new MainMenuScreen(game));
     }
 
@@ -215,7 +211,6 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         preferences.putInteger("gameId", gameId);
         preferences.putString("opponentName", opponentName);
         preferences.flush();
-
         enterGame();
     }
 
@@ -230,13 +225,23 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
     }
 
     @Override
-    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
+    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray, boolean fromStart) {
         GameScreen gameScreen = new GameScreen(game, connectionHandler);
-        gameScreen.restoredGame(xs, ys, valuesArray);
+        gameScreen.restoredGame(xs, ys, valuesArray, fromStart);
         game.setScreen(gameScreen);
     }
 
-    public int historyStored(){
+  @Override
+  public void confirmMove() {
+
+  }
+
+  @Override
+  public void rejectMove() {
+
+  }
+
+  public int historyStored(){
       return 0;
     }
 }

@@ -10,13 +10,13 @@ public interface ConnectionHandler {
 
     void setDelegate(ConnectionHandlerDelegate delegate);
 
-    void searchGame(String name) throws IOException;
-    void cancelSearchingGame() throws IOException;
+    void searchGame() throws IOException;
+    void cancelSearchingGame();
 
-    void restoreGame(String token, int gameId);
+    void restoreGame(String token, int gameId, int historyFrom, boolean fromStart);
 
     void sendMove(int x, int y, int[] values);
 
-    void quitGame() throws IOException;
+    void quitGame();
 
 }

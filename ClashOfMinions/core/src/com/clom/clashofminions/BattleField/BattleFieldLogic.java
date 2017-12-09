@@ -368,15 +368,20 @@ public class BattleFieldLogic {
     }
 
 
-    /**
-     * Used to rebuild battlefield from a history of events. Only a list of minions is required.
-     * @param turns
-     */
-    public void retrace(List<MinionNode> turns){
-        for(MinionNode n : turns){
-                addMinionAsTurn(n,n.minion.xPos,n.minion.yPos,n.minion.isLeftPlayer);
-            }
+  /**
+   *  Call to restart the game
+   */
+    public void reset(){
+        leftPlayerMinions.clear();
+        rightPlayerMinions.clear();
+        gameOver = false;
+        for(int i = 0; i < field.length; ++i){
+          for(int j = 0; j < field[0].length; ++j){
+            field[i][j] = null;
+          }
         }
+        isLeftPlayerTurn = true;
+    }
 
     public static class Event{
         public MinionNode src;

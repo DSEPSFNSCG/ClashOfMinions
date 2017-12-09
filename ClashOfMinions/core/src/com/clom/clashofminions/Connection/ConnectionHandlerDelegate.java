@@ -14,7 +14,9 @@ public interface ConnectionHandlerDelegate {
 
     void quitAction();
 
-    void restoredGame(int[] xs, int[] ys, int[][] valuesArray);
+    void restoredGame(int[] xs, int[] ys, int[][] valuesArray, boolean fromStart);
+    void confirmMove();
+    void rejectMove();
 
     int historyStored();
 }

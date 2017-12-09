@@ -17,6 +17,8 @@ import com.badlogic.gdx.utils.Timer;
 import com.clom.clashofminions.GameScreen;
 import com.clom.clashofminions.UIConstants;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Created by greensn on 09.11.17.
  */
@@ -30,6 +32,9 @@ public class BattleField extends Group {
     public BattleFieldLogic battleFieldLogic;
 
     public MinionNode floatingMinion;
+    public MinionNode storedMinion;
+    public AtomicBoolean waitingForConfirm = new AtomicBoolean(false);
+    public AtomicBoolean processingConfirm = new AtomicBoolean(false);
 
     public volatile int turnCount = 0;
 
@@ -169,10 +174,11 @@ public class BattleField extends Group {
     }
 
 
-    Boolean draggedTo(float x, float y)
+    synchronized Boolean draggedTo(float x, float y)
     {
         if (animationsRunning) return false;
         if (!battleFieldLogic.isLeftPlayerTurn) return false;
+        if(waitingForConfirm.get()) return false;
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
         if (coord.x == -1 || coord.y == -1) return false;
         if (coord.x >= 4 && battleFieldLogic.isLeftPlayerTurn) return false;
@@ -222,10 +228,37 @@ public class BattleField extends Group {
         return new Vector2(w * coord.x, h * coord.y);
     }
 
+    public synchronized void queuePlacement(){
+        if(waitingForConfirm.compareAndSet(false,true)) {
+            storedMinion = floatingMinion;
+        }
+    }
+
+    public void confirmPlacement(){
+        placeFloatingMinion();
+    }
+
+    public void rejectPlacement(){
+      if(processingConfirm.compareAndSet(false, true)){
+        if(waitingForConfirm.get()) {
+          storedMinion = null;
+          waitingForConfirm.set(false);
+        }
+        processingConfirm.set(false);
+      }
+
+    }
+
     public void placeFloatingMinion()
     {
-        placeMinion(floatingMinion, true);
-        floatingMinion = null;
+      if(processingConfirm.compareAndSet(false, true)) {
+        if (waitingForConfirm.get()) {
+          placeMinion(storedMinion, true);
+          storedMinion = null;
+          waitingForConfirm.set(false);
+        }
+        processingConfirm.set(false);
+      }
     }
 
     public Boolean animationsRunning = false;
@@ -455,5 +488,12 @@ public class BattleField extends Group {
             visiblePopUp.remove();
             visiblePopUp = null;
         }
+    }
+
+    public void reset(){
+        //TODO: confirm this resets the battlefield without memory leaks or other issues
+        this.clearChildren();
+        this.clearActions();
+        battleFieldLogic.reset();
     }
 }

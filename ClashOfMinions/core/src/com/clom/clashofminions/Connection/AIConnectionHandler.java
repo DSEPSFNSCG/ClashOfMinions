@@ -16,7 +16,7 @@ public class AIConnectionHandler implements ConnectionHandler {
     }
 
     @Override
-    public void searchGame(String name) {
+    public void searchGame() {
 
         Timer.schedule(new Timer.Task(){
             @Override
@@ -35,7 +35,7 @@ public class AIConnectionHandler implements ConnectionHandler {
     }
 
     @Override
-    public void restoreGame(String token, int gameId) {
+    public void restoreGame(String token, int gameId, int HistoryFrom, boolean fromStart) {
         Timer.schedule(new Timer.Task(){
             @Override
             public void run() {
@@ -53,7 +53,8 @@ public class AIConnectionHandler implements ConnectionHandler {
                                     {3, 3, 3, 3, 3, 3, 3, 3},
                                     {3, 3, 3, 3, 3, 3, 3, 3},
                                     {3, 3, 3, 3, 3, 3, 3, 3},
-                            }
+                            },
+                            true
                     );
                 }
             }
