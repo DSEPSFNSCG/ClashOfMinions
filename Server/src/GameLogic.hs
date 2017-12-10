@@ -69,10 +69,10 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
       c = fst p + 1
       r = snd p + 1
       conditions =
-        [ if leftPlayer player then
-            (0 < c && c <= 4, "X must be between 0 and 3") else
-            (6 < c && c <= 10, "X must be between 6 and 9")
-        , (0 < r && r <= 4, "Y must be between 0 and 3")
+        [ (if leftPlayer player then
+            (0 <= c && c <= 4, "X must be between -1 and 3") else
+            (6 < c && c <= 10, "X must be between 6 and 9"))
+        , (0 <= r && r <= 4, "Y must be between -1 and 3")
         , (f_attackdmg s < 5 , "You cheater!")
         , (f_attackrange s < 4, "You cheater!")
         , (f_buffrange s < 4 , "You cheater!")
@@ -95,11 +95,17 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
       newField = setElem (Just minion) (r, c) $ field state
   in case error of
     Just msg -> Left msg
-    Nothing -> Right $ state { history = placement:(history state)
-                             , nextMinionId = (nextMinionId state) + 1
-                             , currentPlayer = (waitingPlayer state)
-                             , waitingPlayer = (currentPlayer state)
-                             }
+    Nothing -> Right $
+     if c == 0 || r == 0 then
+       state { currentPlayer = (waitingPlayer state)
+             , waitingPlayer = (currentPlayer state)
+             }
+     else
+       state { history = placement:(history state)
+             , nextMinionId = (nextMinionId state) + 1
+             , currentPlayer = (waitingPlayer state)
+             , waitingPlayer = (currentPlayer state)
+             }
     {-
       case simulate (leftPlayer player) player newField of
       Nothing -> return $ GameDone { winningPlayer = player
