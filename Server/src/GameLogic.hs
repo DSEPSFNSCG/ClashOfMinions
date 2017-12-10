@@ -84,7 +84,6 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
 
         , (f_attackdmg s + f_attackrange s + f_buffrange s + f_healing s + f_atkbuff s + f_healbuff s + f_shield s + f_maxhealth s < 5, "Too many points!")
 
-        , (getElem r c (field state) == Nothing, "field is already occupied")
         ]
 
       error = fmap snd . find (\(p, e) -> not p) $ conditions
@@ -96,13 +95,19 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
       newField = setElem (Just minion) (r, c) $ field state
   in case error of
     Just msg -> Left msg
-    Nothing -> case simulate (leftPlayer player) player newField of
+    Nothing -> Right $ state { history = placement:(history state)
+                             , nextMinionId = (nextMinionId state) + 1
+                             , currentPlayer = (waitingPlayer state)
+                             , waitingPlayer = (currentPlayer state)
+                             }
+    {-
+      case simulate (leftPlayer player) player newField of
       Nothing -> return $ GameDone { winningPlayer = player
                                    , losingPlayer = (waitingPlayer state) }
       Just newField' -> return $ switchPlayers $
         state { history = placement:(history state)
               , field = newField'
-              , nextMinionId = (nextMinionId state) + 1 }
+              , nextMinionId = (nextMinionId state) + 1 }-}
 
 
 gameTransition :: Game -> GameState -> Player -> GameEvent -> IO GameState
