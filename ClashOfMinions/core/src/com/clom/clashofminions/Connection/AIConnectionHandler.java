@@ -1,6 +1,10 @@
 package com.clom.clashofminions.Connection;
 
 import com.badlogic.gdx.utils.Timer;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
+import java.io.IOException;
+import java.net.InetAddress;
 
 /**
  * Created by greensn on 04.12.17.
@@ -10,6 +14,10 @@ public class AIConnectionHandler implements ConnectionHandler {
 
     ConnectionHandlerDelegate delegate;
 
+    public AIConnectionHandler(InetAddress address, int port, String username) throws IOException {
+
+    }
+
     @Override
     public void setDelegate(ConnectionHandlerDelegate delegate) {
         this.delegate = delegate;
@@ -18,15 +26,30 @@ public class AIConnectionHandler implements ConnectionHandler {
     @Override
     public void searchGame() {
 
+        final Boolean begins = (int)(Math.random() * 2) == 0;
+
         Timer.schedule(new Timer.Task(){
             @Override
             public void run() {
                 if (delegate != null)
                 {
-                    delegate.gameFound("lol", 1, "Mallory", true);
+                    delegate.gameFound("lol", 1, "Mallory", begins);
                 }
             }
         }, 2.0f);
+
+        if (!begins)
+        {
+            Timer.schedule(new Timer.Task(){
+                @Override
+                public void run() {
+                    if (delegate != null)
+                    {
+                        delegate.receivedMove(9, (int)(Math.random() * 4), new int[]{3, 3, 3, 3, 3, 3, 3, 3});
+                    }
+                }
+            }, 2.5f);
+        }
     }
 
     @Override
@@ -53,8 +76,7 @@ public class AIConnectionHandler implements ConnectionHandler {
                                     {3, 3, 3, 3, 3, 3, 3, 3},
                                     {3, 3, 3, 3, 3, 3, 3, 3},
                                     {3, 3, 3, 3, 3, 3, 3, 3},
-                            },
-                            true
+                            }
                     );
                 }
             }
@@ -69,7 +91,7 @@ public class AIConnectionHandler implements ConnectionHandler {
             public void run() {
                 if (delegate != null)
                 {
-                    if ((int)(Math.random() * 2) == 0)
+                    if ((int)(Math.random() * 10) == 0)
                     {
                         delegate.opponentQuit();
                         delegate = null;

@@ -28,9 +28,6 @@ import com.clom.clashofminions.Nodes.ManaBarNode;
 import com.clom.clashofminions.Nodes.SliderNode;
 import com.clom.clashofminions.Nodes.SliderType;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 
 /**
  * Created by greensn on 08.11.17.
@@ -59,11 +56,11 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     ManaBarNode manaBarNode;
 
-    static AtomicBoolean attemptturn = new AtomicBoolean(false);
-    AtomicBoolean waitingForServer = new AtomicBoolean(false);
     BattleField battleField;
 
     Group pauseMenuGroup;
+
+    Boolean isFirstPlayer;
 
     GameOverGroup gameOverGroup;
 
@@ -79,14 +76,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         setupBackground();
         setupBattleField();
         setupInterface();
-        Preferences preferences = Gdx.app.getPreferences("UserData");
-        System.out.println(preferences.getBoolean("isFirstPlayer"));
-        if(!preferences.getBoolean("isFirstPlayer")){
-          System.out.println(waitingForServer.get() + " at initializer");
-          waitingForServer.set(true);
-        }else{
-          waitingForServer.set(false);
-        }
+
         Gdx.input.setInputProcessor(stage);
     }
 
@@ -156,11 +146,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             @Override
             public void clicked(InputEvent event, float x, float y)
             {
-                System.out.println(waitingForServer.get() + "at listener");
-                if(waitingForServer.compareAndSet(false, true)){
-                    System.out.println("Turn");
-                    placeAction();
-                }
+                System.out.println("Turn");
+                placeAction();
             }
         });
     }
@@ -197,7 +184,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         battleField.setPosition(UIConstants.battleFieldPositionX * stage.getWidth(), UIConstants.battleFieldPositionY * stage.getHeight());
         stage.addActor(battleField);
         battleField.setup();
-        battleField.battleFieldLogic.isLeftPlayerTurn = true;
+        isFirstPlayer = preferences.getBoolean("isFirstPlayer", true);
+        battleField.battleFieldLogic.isLeftPlayerTurn = isFirstPlayer;
 
         Image nameTagSprite = new Image(nameTagTexture);
         nameTagSprite.setWidth(UIConstants.nameTagWidth * stage.getWidth());
@@ -357,7 +345,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     public void quitAction()
     {
         connectionHandler.quitGame();
-        returnToMainMenu(); //TODO: does doing this repeatedly delete the old data? Or is this a memory leak?
+        returnToMainMenu();
     }
 
     public void returnToMainMenu()
@@ -371,28 +359,22 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     private void placeAction()
     {
-        Preferences preferences = Gdx.app.getPreferences("UserData");
-
-        if (battleField.battleFieldLogic.isLeftPlayerTurn != preferences.getBoolean("isFirstPlayer") || battleField.animationsRunning) return;
-        System.out.println("queueplacement");
-        battleField.queuePlacement();
-        System.out.println(battleField.storedMinion.toString());
-        System.out.println("updatestats");
+        if (!battleField.battleFieldLogic.isLeftPlayerTurn || battleField.animationsRunning) return;
         updateMinionStats();
-        System.out.println("send minion");
         sendFloatingMinion();
+        battleField.placeFloatingMinion();
     }
 
     public void updateMinionStats()
     {
-        if (battleField.storedMinion != null)
+        if (battleField.floatingMinion != null)
         {
             for (SliderNode slider:sliders)
             {
-                battleField.storedMinion.minion.setAttribute(slider.type.toString(), slider.getSliderValue());
+                battleField.floatingMinion.minion.setAttribute(slider.type.toString(), slider.getSliderValue());
             }
-            battleField.storedMinion.minion.setAttribute("MaxHealth", battleField.storedMinion.minion.getAttribute("Health"));
-            battleField.storedMinion.updateStats();
+            battleField.floatingMinion.minion.setAttribute("MaxHealth", battleField.floatingMinion.minion.getAttribute("Health"));
+            battleField.floatingMinion.updateStats();
         }
     }
 
@@ -439,11 +421,12 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     void sendFloatingMinion()
     {
-        if (battleField.storedMinion != null)
+        if (battleField.floatingMinion != null)
         {
-            int x = battleField.storedMinion.minion.xPos;
-            int y = battleField.storedMinion.minion.yPos;
-            System.out.println("Send " + x + ", " + y);
+            int x = battleField.floatingMinion.minion.xPos;
+            if (!isFirstPlayer) x = 9-x;
+
+            int y = battleField.floatingMinion.minion.yPos;
             int[] values = new int[8];
             for (int i = 0; i < 8; i++)
             {
@@ -454,7 +437,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         }
         else
         {
-            //connectionHandler.sendMove(-1, -1, null);
+            connectionHandler.sendMove(-1, -1, null);
         }
     }
 
@@ -465,15 +448,9 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     @Override
     public void receivedMove(int x, int y, int[] values) {
-        attemptturn.set(true);
-        synchronized(this) {
-          if(!attemptturn.get()){
-            return;
-          }
-          placeReceivedMinion(x, y, values, false, true);
-          waitingForServer.set(false);
-        }
-
+        int xPos = x;
+        if (x != -1 && y != -1 && !isFirstPlayer) xPos = 9-xPos;
+        placeReceivedMinion(xPos, y, values, false, true);
     }
 
     @Override
@@ -481,25 +458,10 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         gameOver(true, true);
     }
 
-  /**
-   * Call to restore game, either from current state or from start of the game.
-   * @param xs x coordinates of turns
-   * @param ys y coordinates of turns
-   * @param valuesArray first index is turn, second index refers to stat types
-   * @param fromStart if true, will reset battlefield. Otherwise, will just do turns from where we are.
-   */
     @Override
-    public synchronized void restoredGame(int[] xs, int[] ys, int[][] valuesArray, boolean fromStart) {
-      System.out.println(waitingForServer.get() + "at restoredGame");
-        waitingForServer.set(true);
-        attemptturn.set(false);
+    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
         int turns = xs.length;
 
-      Preferences preferences = Gdx.app.getPreferences("UserData");
-        if(fromStart){
-          battleField.reset();
-          battleField.turnCount = 0;
-        }
         for (int i = 0; i < turns; i++)
         {
             int x = xs[i];
@@ -507,20 +469,21 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
             int[] values = valuesArray[i];
             placeReceivedMinion(x, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
         }
-        if(!preferences.getBoolean("isFirstPlayer")){
-          waitingForServer.set(false);
-        }
-    }
 
-    public int historyStored(){
-      return battleField.turnCount;
     }
 
     @Override
-    public void confirmMove(){
-        battleField.confirmPlacement();
+    public void confirmMove() {
+
     }
-    public void rejectMove(){
-        battleField.rejectPlacement();
+
+    @Override
+    public void rejectMove() {
+
+    }
+
+    @Override
+    public int historyStored() {
+        return 0;
     }
 }

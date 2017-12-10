@@ -19,7 +19,6 @@ import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
 import com.clom.clashofminions.Connection.AIConnectionHandler;
 import com.clom.clashofminions.Connection.ServerConnectionHandler;
 import com.clom.clashofminions.Nodes.ButtonNode;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -226,9 +225,9 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
     }
 
     @Override
-    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray, boolean fromStart) {
+    public void restoredGame(int[] xs, int[] ys, int[][] valuesArray) {
         GameScreen gameScreen = new GameScreen(game, connectionHandler);
-        gameScreen.restoredGame(xs, ys, valuesArray, fromStart);
+        gameScreen.restoredGame(xs, ys, valuesArray);
         game.setScreen(gameScreen);
     }
 

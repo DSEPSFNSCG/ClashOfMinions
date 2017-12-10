@@ -1,7 +1,6 @@
 package com.clom.clashofminions.BattleField;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
@@ -18,8 +17,6 @@ import com.badlogic.gdx.utils.Timer;
 import com.clom.clashofminions.GameScreen;
 import com.clom.clashofminions.UIConstants;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * Created by greensn on 09.11.17.
  */
@@ -33,11 +30,6 @@ public class BattleField extends Group {
     public BattleFieldLogic battleFieldLogic;
 
     public MinionNode floatingMinion;
-    public MinionNode storedMinion;
-    public AtomicBoolean waitingForConfirm = new AtomicBoolean(false);
-    public AtomicBoolean processingConfirm = new AtomicBoolean(false);
-
-    public volatile int turnCount = 0;
 
     float tileWidth;
     float tileHeight;
@@ -47,7 +39,6 @@ public class BattleField extends Group {
     public BattleField(GameScreen game)
     {
         this.game = game;
-        Preferences preferences = Gdx.app.getPreferences("UserData");
         battleFieldLogic = new BattleFieldLogic(UIConstants.battleFieldTilesHorizontal,UIConstants.battleFieldTilesVertical);
     }
 
@@ -176,11 +167,10 @@ public class BattleField extends Group {
     }
 
 
-    synchronized Boolean draggedTo(float x, float y)
+    Boolean draggedTo(float x, float y)
     {
         if (animationsRunning) return false;
         if (!battleFieldLogic.isLeftPlayerTurn) return false;
-        if(waitingForConfirm.get()) return false;
         GridPoint2 coord = positionToCoordinates(new Vector2(x, y));
         if (coord.x == -1 || coord.y == -1) return false;
         if (coord.x >= 4 && battleFieldLogic.isLeftPlayerTurn) return false;
@@ -197,7 +187,7 @@ public class BattleField extends Group {
             game.updateMinionStats();
         }
 
-        System.out.println("Dragged minion to: " + coord);
+        //System.out.println("Dragged minion to: " + coord);
 
         Vector2 newPosition = coordinatesToPosition(coord);
         floatingMinion.setPosition(newPosition.x, newPosition.y);
@@ -230,41 +220,10 @@ public class BattleField extends Group {
         return new Vector2(w * coord.x, h * coord.y);
     }
 
-    public synchronized void queuePlacement(){
-        if(waitingForConfirm.compareAndSet(false,true)) {
-            storedMinion = floatingMinion;
-            if(storedMinion == null){
-                waitingForConfirm.set(false);
-                System.out.println("No minion assigned");
-            }
-        }
-    }
-
-    public void confirmPlacement(){
-        placeFloatingMinion();
-    }
-
-    public void rejectPlacement(){
-      if(processingConfirm.compareAndSet(false, true)){
-        if(waitingForConfirm.get()) {
-          storedMinion = null;
-          waitingForConfirm.set(false);
-        }
-        processingConfirm.set(false);
-      }
-
-    }
-
     public void placeFloatingMinion()
     {
-      if(processingConfirm.compareAndSet(false, true)) {
-        if (waitingForConfirm.get()) {
-          placeMinion(storedMinion, true);
-          storedMinion = null;
-          waitingForConfirm.set(false);
-        }
-        processingConfirm.set(false);
-      }
+        placeMinion(floatingMinion, true);
+        floatingMinion = null;
     }
 
     public Boolean animationsRunning = false;
@@ -272,7 +231,6 @@ public class BattleField extends Group {
 
     public void placeMinion(MinionNode minionNode, Boolean animated)
     {
-        ++turnCount;
         if (battleFieldLogic.gameOver) return;
         if (animationsRunning)
         {
@@ -318,7 +276,7 @@ public class BattleField extends Group {
 
         if (animated)
         {
-            animationsRunning = true;
+            //animationsRunning = true;
             Timer.schedule(new Timer.Task(){
                 @Override
                 public void run() {
@@ -494,12 +452,5 @@ public class BattleField extends Group {
             visiblePopUp.remove();
             visiblePopUp = null;
         }
-    }
-
-    public void reset(){
-        //TODO: confirm this resets the battlefield without memory leaks or other issues
-        this.clearChildren();
-        this.clearActions();
-        battleFieldLogic.reset();
     }
 }

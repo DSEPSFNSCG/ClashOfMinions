@@ -2,7 +2,6 @@ package com.clom.clashofminions.Connection;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.utils.Timer;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,6 +11,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.logging.Handler;
+
 
 /**
  * Created by 2weirdy on 2017-12-08.
@@ -255,15 +256,14 @@ public class ServerConnectionHandler implements ConnectionHandler {
             }
 
             // and then restore the game on the main thread
-            Timer.schedule(new Timer.Task() {
+            Gdx.app.postRunnable(new Runnable() {
               @Override
               public void run() {
                 if (delegate != null) {
-                  delegate.restoredGame(x, y, valuesArray, true);
+                  delegate.restoredGame(x, y, valuesArray);
                 }
               }
-            }, 0.0f);
-            break;
+            });
           } else if (type.equals("otherPlayerPlaced")) {
             JSONObject contents = ans.getJSONObject("contents");
             final JSONArray position = contents.getJSONArray("position");
@@ -279,35 +279,34 @@ public class ServerConnectionHandler implements ConnectionHandler {
             values[7] = stats.getInt("healbuff");
 
             // after receiving the information, tell the delegate to execute the received move on the main thread
-            Timer.schedule(new Timer.Task() {
+            Gdx.app.postRunnable(new Runnable() {
               @Override
               public void run() {
                 if (delegate != null) {
                   delegate.receivedMove(position.getInt(0), position.getInt(1), values);
                 }
               }
-            }, 0.0f);
-            break;
+            });
           } else if (type.equals("placeSuccess")) {
-            Timer.schedule(new Timer.Task() {
+            Gdx.app.postRunnable(new Runnable() {
               @Override
               public void run() {
                 if (delegate != null) {
                   delegate.confirmMove();
                 }
               }
-            }, 0.0f);
+            });
           } else if (type.equals("invalidPlacing")) {
-            Timer.schedule(new Timer.Task() {
+            Gdx.app.postRunnable(new Runnable() {
               @Override
               public void run() {
                 if (delegate != null) {
                   delegate.rejectMove();
                 }
-                Preferences preferences = Gdx.app.getPreferences("UserData");
-                restoreGame(preferences.getString("token"), preferences.getInteger("gameId"), 0, true);
+                //Preferences preferences = Gdx.app.getPreferences("UserData");
+                //restoreGame(preferences.getString("token"), preferences.getInteger("gameId"), 0, true);
               }
-            }, 0.0f);
+            });
           } else if (type.equals("gameStart")) {
 
             //get information about the game
@@ -318,14 +317,14 @@ public class ServerConnectionHandler implements ConnectionHandler {
 
             System.out.println(isFirstPlayer);
             //Schedule the delegate to arrange to start the game on the main loop
-            Timer.schedule(new Timer.Task() {
+            Gdx.app.postRunnable(new Runnable() {
               @Override
               public void run() {
                 if (delegate != null) {
                   delegate.gameFound(token, gameID, othername, isFirstPlayer);
                 }
               }
-            }, 0.0f);
+            });
           } else if (type.equals("logResponse")) {
             System.out.println(ans.getString("contents"));
           } else if (type.equals("tokenMismatch")){
@@ -334,16 +333,18 @@ public class ServerConnectionHandler implements ConnectionHandler {
             }
           }
         }
+        System.out.println("stopped replyListener");
       }catch(Exception e){
         e.printStackTrace();
-        Timer.schedule(new Timer.Task() {
+
+        Gdx.app.postRunnable(new Runnable() {
           @Override
           public void run() {
             if (delegate != null) {
               delegate.quitAction(); //TODO: display error to user?
             }
           }
-        }, 0.0f);
+        });
       }
     }
   }
