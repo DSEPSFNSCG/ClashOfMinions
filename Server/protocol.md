@@ -75,7 +75,7 @@ Client -> Server
   "type" : "restoreRequest",
   "gameId" : 1,
   "token" : 504351564210654210,
-  "getHistoryFrom" : 10,
+  "historyFrom" : 10,
 }
 ```
 
@@ -86,21 +86,27 @@ Client -> Server
     {
       "position": [3,5],
       "stats" : {
-        "boosthealrange" : 3,
-        "attackrange" : 2,
-        "health" : 4,
-        "attackdmg" : 2,
-        "healstrength" : 1
+        "attackdmg":0,
+        "attackrange":0,
+        "buffrange":0,
+        "healing":0,
+        "atkbuff":0,
+        "healbuff":0,
+        "shield":0,
+        "maxhealth":0
       }
     },
     {
       "position": [3,5],
       "stats" : {
-        "boosthealrange" : 3,
-        "attackrange" : 2,
-        "health" : 4,
-        "attackdmg" : 2,
-        "healstrength" : 1
+        "attackdmg":0,
+        "attackrange":0,
+        "buffrange":0,
+        "healing":0,
+        "atkbuff":0,
+        "healbuff":0,
+        "shield":0,
+        "maxhealth":0
       }
     },
   ]
@@ -112,7 +118,7 @@ There can be any number of responses like this:
 
 ```json
 {
-  "type" : "logResponse",
-  "contents" : "some arbitrary message"
+  "type" : "<foo>logResponse",
+  "message" : "some arbitrary message"
 }
 ```
