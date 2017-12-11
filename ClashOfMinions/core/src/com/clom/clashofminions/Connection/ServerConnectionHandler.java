@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.logging.Handler;
 
@@ -61,7 +62,8 @@ public class ServerConnectionHandler implements ConnectionHandler {
     this.port = port;
     System.out.println(address.toString());
     System.out.println(port);
-    socket = new Socket(address, port);
+    socket = new Socket();
+    socket.connect(new InetSocketAddress(address, port), 10000);
     iStream = socket.getInputStream();
     oStream = new PrintWriter(socket.getOutputStream());
     System.out.println("Established connection");
@@ -124,10 +126,10 @@ public class ServerConnectionHandler implements ConnectionHandler {
    * @param fromStart true iff we wish to rebuild the game from scratch rather than rebuild any missing turns
    */
   @Override
-  public void restoreGame(final String token, final int gameId, final int historyFrom, final boolean fromStart) {
+  public void restoreGame(final String token, final int gameId, final int historyFrom, final boolean fromStart, final String name) {
 
     // send a message
-    String msg = JSONbuilder.restoreGame(token, gameId,fromStart?0:delegate.historyStored());
+    String msg = JSONbuilder.restoreGame(token, gameId,fromStart?0:delegate.historyStored(),name);
     System.out.println(msg);
     oStream.print(msg);
     oStream.flush();
@@ -150,6 +152,13 @@ public class ServerConnectionHandler implements ConnectionHandler {
 
   @Override
   public void quitGame(){
+    //Send message to server
+    String msg = JSONbuilder.resign();
+    System.out.println(msg);
+    oStream.print(msg);
+    oStream.flush();
+    System.out.println("Wrote message");
+
     delegate = null;
     stop = true;
     try {
@@ -172,6 +181,12 @@ public class ServerConnectionHandler implements ConnectionHandler {
       o.put("type","newGame");
       o.put("name",username);
       System.out.println(username);
+      return o.toString() + "\n";
+    }
+
+    public static String resign(){
+      JSONObject o = new JSONObject();
+      o.put("type","giveUp");
       return o.toString() + "\n";
     }
 
@@ -203,12 +218,13 @@ public class ServerConnectionHandler implements ConnectionHandler {
       return o.toString() + "\n";
     }
 
-    public static String restoreGame(String token, int gameId, int HistoryFrom){
+    public static String restoreGame(String token, int gameId, int HistoryFrom, String name){
       JSONObject o = new JSONObject();
       o.put("type","restoreGame");
       JSONObject contents = new JSONObject();
       contents.put("gameId",gameId);
       contents.put("token",token);
+      contents.put("name",name);
       contents.put("getHistoryFrom",HistoryFrom);
       o.put("contents",contents);
       return o.toString() + "\n";
@@ -293,6 +309,15 @@ public class ServerConnectionHandler implements ConnectionHandler {
               public void run() {
                 if (delegate != null) {
                   delegate.confirmMove();
+                }
+              }
+            });
+          } else if (type.equals("otherPlayerGaveUp")) {
+            Gdx.app.postRunnable(new Runnable() {
+              @Override
+              public void run() {
+                if (delegate != null) {
+                  delegate.opponentQuit();
                 }
               }
             });

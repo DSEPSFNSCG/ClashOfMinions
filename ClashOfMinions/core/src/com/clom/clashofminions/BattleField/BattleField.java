@@ -309,22 +309,27 @@ public class BattleField extends Group {
         float sDelay = 0f;
         for (BattleFieldLogic.Event event : battleFieldLogic.minionHeals)
         {
+            Boolean healedSomeone = false;
             final MinionNode n1 = event.src;
             for (int i = 0; i < event.targets.size(); i++) {
                 final MinionNode n2 = event.targets.get(i);
-                if (animated) healAnimation(
-                        new GridPoint2(n1.minion.xPos, n1.minion.yPos),
-                        new GridPoint2(n2.minion.xPos, n2.minion.yPos),
-                        n2,
-                        event.value1.get(i),
-                        delay + sDelay,
-                        duration);
+                Boolean atFullHealth = n2.animationHealth == n2.minion.getAttribute("MaxHealth");
+                if (animated && !atFullHealth) {
+                    healAnimation(
+                            new GridPoint2(n1.minion.xPos, n1.minion.yPos),
+                            new GridPoint2(n2.minion.xPos, n2.minion.yPos),
+                            n2,
+                            event.value1.get(i),
+                            delay + sDelay,
+                            duration);
+                    healedSomeone = true;
+                }
                 else
                 {
                     n2.updateStats();
                 }
             }
-            sDelay += duration;
+            if (healedSomeone) sDelay += duration;
         }
         return sDelay;
     }

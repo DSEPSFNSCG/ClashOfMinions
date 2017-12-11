@@ -13,7 +13,7 @@ public interface ConnectionHandler {
     void searchGame() throws IOException;
     void cancelSearchingGame();
 
-    void restoreGame(String token, int gameId, int historyFrom, boolean fromStart);
+    void restoreGame(String token, int gameId, int historyFrom, boolean fromStart, String name);
 
     void sendMove(int x, int y, int[] values);
 

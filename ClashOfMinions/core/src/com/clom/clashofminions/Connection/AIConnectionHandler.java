@@ -58,7 +58,7 @@ public class AIConnectionHandler implements ConnectionHandler {
     }
 
     @Override
-    public void restoreGame(String token, int gameId, int HistoryFrom, boolean fromStart) {
+    public void restoreGame(String token, int gameId, int HistoryFrom, boolean fromStart, String name) {
         Timer.schedule(new Timer.Task(){
             @Override
             public void run() {

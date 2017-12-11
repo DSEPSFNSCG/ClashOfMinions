@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.clom.clashofminions.Connection.ConnectionHandler;
 import com.clom.clashofminions.Connection.ConnectionHandlerDelegate;
@@ -42,6 +43,8 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
 
     float loadingTime = 0;
 
+    Label loadingLabel;
+
     LoadingScreen(final ClashOfMinions game, final String address)
     {
         this.game = game;
@@ -55,7 +58,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
 
 
         Float labelScale = 0.65f;
-        Label loadingLabel = new Label("Searching game...", UIConstants.labelStyle);
+        loadingLabel = new Label("Searching game...", UIConstants.labelStyle);
         loadingLabel.setFontScale(labelScale);
         loadingLabel.setBounds(0, stage.getHeight()*0.8f, stage.getWidth(), stage.getHeight()*0.2f);
         loadingLabel.setAlignment(Align.center);
@@ -94,7 +97,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
           s.next();
           this.port = Integer.valueOf(s.nextLine());
           //Connect to server
-          connectToServer();
+            connectToServer();
         } catch (UnknownHostException e) {
           return; //TODO: show error?
         } catch (IOException e){
@@ -152,32 +155,50 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
     {
         System.out.println("Connecting...");
         Preferences preferences = Gdx.app.getPreferences("UserData");
-        String name = preferences.getString("userName", "Bob");
+        final String name = preferences.getString("userName", "Bob");
+
+        Runnable r = new Runnable() {
+            public void run() {
+                try {
+                    connectionHandler = new ServerConnectionHandler(address,port,name);
+                    serverConnectionSucceeded();
+                } catch (IOException e) {
+                    serverConnectionFailed();
+                }
+            }
+        };
+
+        new Thread(r).start();
+    }
+
+    void serverConnectionSucceeded()
+    {
+        Preferences preferences = Gdx.app.getPreferences("UserData");
         Boolean gameRunning = preferences.getBoolean("gameRunning", false);
 
-      try {
-        connectionHandler = new ServerConnectionHandler(address,port,name);
-      } catch (IOException e) {
-        closeServerConnection();
-        return; // TODO: Error Message;
-      }
-      connectionHandler.setDelegate(this);
+        connectionHandler.setDelegate(this);
 
         if (gameRunning)
         {
             String token = preferences.getString("gameToken", "");
+            String userName = preferences.getString("userName", "Bob");
             int gameId = preferences.getInteger("gameId", 0);
             System.out.println("Restoring from main menu");
-            connectionHandler.restoreGame(token, gameId,0, true); //TODO: is turn data supposed to be stored in the battlefield or not?
+            connectionHandler.restoreGame(token, gameId,0, true, userName); //TODO: is turn data supposed to be stored in the battlefield or not?
         }
         else
         {
-          try {
-            connectionHandler.searchGame();
-          } catch (IOException e) {
-            closeServerConnection(); //TODO: Show ErrorMessage to User
-          }
+            try {
+                connectionHandler.searchGame();
+            } catch (IOException e) {
+                closeServerConnection(); //TODO: Show ErrorMessage to User
+            }
         }
+    }
+
+    void serverConnectionFailed()
+    {
+        loadingLabel.setText("Cannot connect to Server!");
     }
 
     public void quitAction(){
@@ -191,7 +212,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         Preferences preferences = Gdx.app.getPreferences("UserData");
         preferences.putBoolean("gameRunning", false);
         preferences.flush();
-        connectionHandler.cancelSearchingGame();
+        if (connectionHandler != null) connectionHandler.cancelSearchingGame();
         game.setScreen(new MainMenuScreen(game));
     }
 

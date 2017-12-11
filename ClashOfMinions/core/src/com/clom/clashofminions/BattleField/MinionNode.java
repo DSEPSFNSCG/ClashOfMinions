@@ -25,6 +25,8 @@ public class MinionNode extends Actor {
     int health;
     int shield;
 
+    public int animationHealth;
+
     public Boolean isFloating = false;
 
     public MinionNode(boolean isLeftPlayer){
@@ -115,6 +117,7 @@ public class MinionNode extends Actor {
     {
         this.health = minion.getAttribute("Health");
         this.shield = minion.getAttribute("Shield");
+        this.animationHealth = health;
     }
 
     public void setShield(int shield) {
@@ -123,6 +126,7 @@ public class MinionNode extends Actor {
     public void setHealth(int health)
     {
         this.health = health;
+        this.animationHealth = health;
     }
 
     @Override

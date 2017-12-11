@@ -60,6 +60,8 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     Group pauseMenuGroup;
 
+    Label turnLabel;
+
     Boolean isFirstPlayer;
 
     GameOverGroup gameOverGroup;
@@ -102,11 +104,11 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         turnButton.setWidth(UIConstants.turnButtonWidth * stage.getWidth());
         turnButton.setHeight(UIConstants.turnButtonWidth * stage.getWidth() * 2);
 
-        manaBarNode = new ManaBarNode(5);
+        manaBarNode = new ManaBarNode(8);
         manaBarNode.setPosition(UIConstants.manaBarPositionX * stage.getWidth(), UIConstants.gameLowerPadding * stage.getHeight());
         manaBarNode.setWidth(UIConstants.manaBarWidth * stage.getWidth());
         manaBarNode.setHeight(UIConstants.manaBarHeight * stage.getHeight());
-        manaBarNode.actualStep = 5;
+        manaBarNode.actualStep = 8;
 
         stage.addActor(manaBarNode);
         stage.addActor(pauseButton);
@@ -213,6 +215,27 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         playerNameLabel2.setBounds(nameTagSprite2.getX(), nameTagSprite2.getY(), nameTagSprite2.getWidth(), nameTagSprite2.getHeight());
         playerNameLabel2.setAlignment(Align.center);
         stage.addActor(playerNameLabel2);
+
+        Image turnSprite = new Image(nameTagTexture);
+        turnSprite.setWidth(UIConstants.nameTagWidth * stage.getWidth());
+        turnSprite.setHeight(UIConstants.nameTagHeight * stage.getWidth());
+        turnSprite.setPosition(battleField.getX() + battleField.getWidth() * 0.3925f, battleField.getY() + battleField.getHeight() * (-0.165f));
+        stage.addActor(turnSprite);
+
+        turnLabel = new Label("", UIConstants.labelStyle);
+        turnLabel.setColor(new Color(0xFFFFFFFF));
+        turnLabel.setFontScale(labelScale);
+        turnLabel.setBounds(turnSprite.getX(), turnSprite.getY(), turnSprite.getWidth(), turnSprite.getHeight());
+        turnLabel.setAlignment(Align.center);
+        stage.addActor(turnLabel);
+
+        updateTurnLabel();
+    }
+
+    void updateTurnLabel()
+    {
+        turnLabel.setText(battleField.battleFieldLogic.isLeftPlayerTurn ? "Blue Turn" : "Red Turn");
+        turnLabel.setColor(new Color(battleField.battleFieldLogic.isLeftPlayerTurn ? 0x4169E1FF : 0xFF3030FF));
     }
 
     void setupPauseMenu()
@@ -363,6 +386,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         updateMinionStats();
         sendFloatingMinion();
         battleField.placeFloatingMinion();
+        updateTurnLabel();
     }
 
     public void updateMinionStats()
@@ -417,6 +441,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
             battleField.placeMinion(minionNode, animated);
         }
+        updateTurnLabel();
     }
 
     void sendFloatingMinion()
@@ -437,7 +462,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         }
         else
         {
-            connectionHandler.sendMove(-1, -1, null);
+            connectionHandler.sendMove(-1, -1, new int[]{0,0,0,0,0,0,0,0});
         }
     }
 
@@ -466,8 +491,12 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         {
             int x = xs[i];
             int y = ys[i];
+
+            int xPos = x;
+            if (x != -1 && y != -1 && !isFirstPlayer) xPos = 9-xPos;
+
             int[] values = valuesArray[i];
-            placeReceivedMinion(x, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
+            placeReceivedMinion(xPos, y, values, battleField.battleFieldLogic.isLeftPlayerTurn, false);
         }
 
     }
