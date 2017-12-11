@@ -71,7 +71,7 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
       conditions =
         [ (if leftPlayer player then
             (0 <= c && c <= 4, "X must be between -1 and 3") else
-            (6 < c && c <= 10, "X must be between 6 and 9"))
+            (c == 0 || 6 < c && c <= 10, "X must be between 6 and 9 or -1"))
         , (0 <= r && r <= 4, "Y must be between -1 and 3")
         , (f_attackdmg s < 5 , "You cheater!")
         , (f_attackrange s < 4, "You cheater!")
