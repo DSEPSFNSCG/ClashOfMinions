@@ -18,6 +18,7 @@ subOptions = customOptions
 
 
 data GameRequest = Place Placement
+                 | GiveUp
                    deriving (Generic, Show)
 
 type History = [Placement]
@@ -32,6 +33,7 @@ data GameResponse = PlaceSuccess
                   | InvalidGameRequest { validGameRequests :: [GameRequest] }
                   | GameLogResponse String
                   | NotYourTurn
+                  | OtherPlayerGaveUp
                   | GameOver { f_won :: Bool}
                   | GameStart { f_gameId    :: Int
                               , f_youStart  :: Bool
@@ -53,6 +55,7 @@ invalidGameRequest = InvalidGameRequest
                           , f_shield = 0
                           , f_maxhealth = 0 }
       }
+    , GiveUp
     ]
   }
 

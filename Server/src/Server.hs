@@ -108,18 +108,22 @@ waitingTrans srv s@(ServerState { inQueue = Nothing }) c (Just (NewGame { name =
 waitingTrans _ s@(ServerState { inQueue = Just cn', games = games, rng = rng }) c (Just (NewGame { name = n })) = do
   tell $ "Requested new game, that's two clients!"
   let gid = length games
-  (game, rng') <- liftSTM $ makeGame rng gid (c, n) cn'
+  (game, rng') <- makeGame rng gid (c, n) cn'
   let io = do
         _ <- forkIO $ runGame game
         return ()
   return (s { inQueue = Nothing, games = game:games, rng = rng' }, Just $ Right $ io)
-waitingTrans _ s@(ServerState { games = gs }) c (Just (RestoreGame (RestoreGameRequest { g_gameId = i, g_token = t, g_historyFrom = h }))) = do
+waitingTrans srv s@(ServerState { games = gs }) c (Just (RestoreGame (RestoreGameRequest { g_gameId = i, g_token = t, g_historyFrom = h, r_name = n}))) = do
   tell $ "Wants to restore game with id " ++ show i ++ ", token " ++ show t ++ ", historyFrom " ++ show h
   case i < length gs of
-    False -> return (s, Just $ Left InvalidGameID)
+    False -> waitingTrans srv s c (Just (NewGame { name = n }))
     True -> do
-      let g = gs !! i
-      mhist <- liftSTM $ restore g c t h
-      case mhist of
-        Nothing   -> return (s, Just $ Left TokenMismatch)
-        Just hist -> return (s, Just $ Left $ RestoreSuccess hist)
+      let g = gs !! (length gs - i - 1)
+      state <- liftSTM $ readTVar (gameState g)
+      case state of
+        GameDone _ _ -> waitingTrans srv s c (Just (NewGame { name = n }))
+        MkGameState { } -> do
+          mhist <- restore g c t h
+          case mhist of
+            Nothing   -> waitingTrans srv s c (Just (NewGame { name = n }))
+            Just hist -> return (s, Just $ Left $ RestoreSuccess hist)

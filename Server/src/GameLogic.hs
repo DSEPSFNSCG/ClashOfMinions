@@ -82,7 +82,7 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
         , (f_shield s < 5, "You cheater!")
         , (f_maxhealth s < 5, "You cheater!")
 
-        , (f_attackdmg s + f_attackrange s + f_buffrange s + f_healing s + f_atkbuff s + f_healbuff s + f_shield s + f_maxhealth s < 5, "Too many points!")
+        --, (f_attackdmg s + f_attackrange s + f_buffrange s + f_healing s + f_atkbuff s + f_healbuff s + f_shield s + f_maxhealth s < 5, "Too many points!")
 
         ]
 
@@ -117,6 +117,7 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
 
 
 gameTransition :: Game -> GameState -> Player -> GameEvent -> IO GameState
+gameTransition _ state@(GameDone _ _) _ _ = return state
 gameTransition game gameState player (PlayerRequest (Place placement)) = do
   putStrLn $ "[GAME] Received placement: " ++ show placement
   if player /= (currentPlayer gameState) then do
@@ -125,22 +126,27 @@ gameTransition game gameState player (PlayerRequest (Place placement)) = do
     return gameState
   else case doPlacement game gameState player placement of
     Left error -> do
+      putStrLn $ "[GAME] Invalid placement: " ++ error ++ ", giving up"
       playerSend player $ InvalidPlacing error
-      putStrLn $ "[GAME] Invalid placement: " ++ error
-      return gameState
+      gameTransition game gameState player (PlayerRequest GiveUp)
     Right newGameState -> do
       playerSend player $ PlaceSuccess
       playerSend (waitingPlayer gameState) $ OtherPlayerPlaced placement
       putStrLn $ "[GAME] Successful placement!"
       putStrLn $ "[GAME] Gamestate is now: " ++ simpleShow newGameState
       --putStrLn $ "\n[GAME] Full Gamestate: " ++ show newGameState
-      case newGameState of
-        GameDone { losingPlayer = lp } -> do
-          putStrLn $ "[GAME] Game Over!"
-          playerSend player $ GameOver True
-          playerSend (waitingPlayer gameState) $ GameOver False
-          return newGameState
-        _ -> return newGameState
+      return newGameState
+gameTransition game gameState player (PlayerRequest GiveUp) = do
+  putStrLn $ "[GAME] Player gave up!"
+  if player == (p1 game)
+    then do
+      playerSend (p2 game) OtherPlayerGaveUp
+      return $ GameDone { winningPlayer = p2 game
+                        , losingPlayer = p1 game }
+    else do
+      playerSend (p1 game) OtherPlayerGaveUp
+      return $ GameDone { winningPlayer = p1 game
+                        , losingPlayer = p2 game }
 gameTransition game gameState player PlayerDisconnect = do
   putStrLn $ "[GAME] Player disconnected!"
   return gameState
