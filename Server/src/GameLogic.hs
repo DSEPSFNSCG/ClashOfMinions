@@ -97,7 +97,8 @@ doPlacement game state player placement@(MkPlacement { f_position = p, f_stats =
     Just msg -> Left msg
     Nothing -> Right $
      if c == 0 || r == 0 then
-       state { currentPlayer = (waitingPlayer state)
+       state { history = placement:(history state)
+             , currentPlayer = (waitingPlayer state)
              , waitingPlayer = (currentPlayer state)
              }
      else
