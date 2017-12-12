@@ -20,10 +20,10 @@ public class MainMenuScreen implements Screen {
 
     final ClashOfMinions game;
 
+    ButtonNode playButton;
+
     Stage stage;
     Table table;
-
-    Texture bgTexture;
 
     MainMenuScreen(final ClashOfMinions game)
     {
@@ -43,7 +43,7 @@ public class MainMenuScreen implements Screen {
         table.setPosition(0, stage.getHeight()/2);
         stage.addActor(table);
 
-        ButtonNode playButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Play.png")));
+        playButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Play.png")));
         playButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
         playButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
@@ -66,6 +66,7 @@ public class MainMenuScreen implements Screen {
                 String name = preferences.getString("userName", "Bob");
                 String address = preferences.getString("serverAddress", "infinisil.com:8081");
                 game.setScreen(new LoadingScreen(game,address));
+                dispose();
             }
         });
 
@@ -76,6 +77,7 @@ public class MainMenuScreen implements Screen {
             {
                 System.out.println("Settings");
                 MainMenuScreen.this.game.setScreen(new SettingsScreen(game));
+                dispose();
             }
         });
 
@@ -119,5 +121,6 @@ public class MainMenuScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        playButton.remove();
     }
 }

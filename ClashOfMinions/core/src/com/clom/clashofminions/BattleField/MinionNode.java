@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.clom.clashofminions.Nodes.SliderType;
 import com.clom.clashofminions.UIConstants;
 
@@ -132,5 +133,27 @@ public class MinionNode extends Actor {
     @Override
     public String toString(){
         return "MinionNode at " + minion.xPos + ", " + minion.yPos;
+    }
+
+    @Override
+    protected void setParent(Group parent) {
+        if (parent == null) dispose();
+        super.setParent(parent);
+    }
+
+    @Override
+    public boolean remove() {
+        dispose();
+        return super.remove();
+    }
+
+    void dispose()
+    {
+        minionTexture.dispose();
+        healthBar.dispose();
+        healthFill.dispose();
+        shieldFill.dispose();
+        sword.dispose();
+        swordFlipped.dispose();
     }
 }

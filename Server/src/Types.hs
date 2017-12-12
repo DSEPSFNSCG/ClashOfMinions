@@ -32,7 +32,8 @@ initialServerState = do
 
 data RestoreGameRequest = RestoreGameRequest { g_gameId      :: Int
                                              , g_token       :: Token
-                                             , g_historyFrom :: Maybe Int }
+                                             , g_historyFrom :: Maybe Int
+                                             , r_name        :: String }
                           deriving (Generic, Show)
 
 data WaitingRequest = NewGame { name :: String }
@@ -48,8 +49,19 @@ data WaitingResponse = Queued
                      | InvalidGameID
                      | TokenMismatch
                      | GameOver
-                     | InvalidWaitingRequest
+                     | InvalidWaitingRequest { validWaitingRequests :: [WaitingRequest] }
+                     | WaitLogResponse { w_message :: String }
                      deriving (Generic, Show)
+
+invalidWaitingRequest = InvalidWaitingRequest { validWaitingRequests =
+                                                [ NewGame { name = "Foobar" }
+                                                , RestoreGame $ RestoreGameRequest
+                                                  { g_gameId = 3
+                                                  , g_token = "450472606304"
+                                                  , g_historyFrom = Just 5
+                                                  , r_name = "Paul" }
+                                                ]
+                                              }
 
 
 instance FromJSON WaitingRequest where

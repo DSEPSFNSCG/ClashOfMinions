@@ -108,9 +108,9 @@ public class BattleFieldLogic {
                     return -xMod;
                 }
                     if(t0.minion.yPos<t1.minion.yPos){
-                    return xMod;
+                    return 1;
                 }else{
-                    return -xMod;
+                    return -1;
                 }
             }
         });
@@ -247,6 +247,22 @@ public class BattleFieldLogic {
     public void doAttacks(){
         ArrayList<MinionNode> curMinions = isLeftPlayerTurn ? leftPlayerMinions : rightPlayerMinions;
         final int xMod = isLeftPlayerTurn ? 1 : -1;
+        Collections.sort(curMinions, new Comparator<MinionNode>() {
+            @Override
+            public int compare(MinionNode t0, MinionNode t1) {
+                if(t0.minion.xPos<t1.minion.xPos){
+                    return xMod;
+                }
+                if(t0.minion.xPos>t1.minion.xPos){
+                    return -xMod;
+                }
+                if(t0.minion.yPos<t1.minion.yPos){
+                    return 1;
+                }else{
+                    return -1;
+                }
+            }
+        });
         for(MinionNode n: curMinions){
             Minion m = n.minion;
             ArrayList<MinionNode> atkTargets = new ArrayList<MinionNode>();

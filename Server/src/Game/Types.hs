@@ -18,23 +18,47 @@ subOptions = customOptions
 
 
 data GameRequest = Place Placement
+                 | GiveUp
                    deriving (Generic, Show)
 
 type History = [Placement]
-data Placement = Placement { f_position :: (Int, Int)
-                           , f_stats    :: Stats
-                           }
+data Placement = MkPlacement { f_position :: (Int, Int)
+                             , f_stats    :: Stats
+                             }
                  deriving (Generic, Show)
 
 data GameResponse = PlaceSuccess
-                  | InvalidPlacing
-                  | InvalidGameRequest
-                  | LogResponse String
+                  | OtherPlayerPlaced Placement
+                  | InvalidPlacing String
+                  | InvalidGameRequest { validGameRequests :: [GameRequest] }
+                  | GameLogResponse String
+                  | NotYourTurn
+                  | OtherPlayerGaveUp
+                  | GameOver { f_won :: Bool}
                   | GameStart { f_gameId    :: Int
                               , f_youStart  :: Bool
                               , f_otherName :: String
-                              , f_token     :: Token }
+                              , f_token     :: Token
+                              }
                     deriving (Generic, Show)
+
+invalidGameRequest = InvalidGameRequest
+  { validGameRequests =
+    [ Place $ MkPlacement
+      { f_position = (0, 3)
+      , f_stats = MkStats { f_attackdmg = 0
+                          , f_attackrange = 0
+                          , f_buffrange = 0
+                          , f_healing = 0
+                          , f_atkbuff = 0
+                          , f_healbuff = 0
+                          , f_shield = 0
+                          , f_maxhealth = 0 }
+      }
+    , GiveUp
+    ]
+  }
+
 
 data GameEvent = PlayerDisconnect
                | PlayerRequest GameRequest
@@ -42,12 +66,27 @@ data GameEvent = PlayerDisconnect
 
 
 
-data Stats = MkStats { f_health :: Int
+data Stats = MkStats { f_attackdmg   :: Int
+                     , f_attackrange :: Int
+                     , f_buffrange   :: Int
+                     , f_healing     :: Int
+                     , f_atkbuff     :: Int
+                     , f_healbuff    :: Int
+                     , f_shield      :: Int
+                     , f_maxhealth   :: Int
                      }
              deriving (Generic, Show)
 
 
-data Minion = MkMinion { f_minionStats :: Stats }
+data Minion = MkMinion { minionId    :: Int
+                       , minionStats :: Stats
+                       , owner       :: Player
+                       }
+            deriving (Show)
+
+instance Eq Minion where
+  m == m' = (minionId m) == (minionId m')
+
 type Field = Matrix (Maybe Minion)
 
 
@@ -56,7 +95,22 @@ data GameState = MkGameState { history       :: History
                              , field         :: Field
                              , currentPlayer :: Player
                              , waitingPlayer :: Player
+                             , nextMinionId  :: Int
                              }
+               | GameDone { winningPlayer :: Player
+                          , losingPlayer  :: Player }
+                 deriving (Show)
+
+simpleShow :: GameState -> String
+simpleShow g = "History: [...] (length " ++ show (length (history g)) ++ "), " ++
+               "CurrentPlayer: " ++ show (currentPlayer g) ++ ", " ++
+               "WaitingPlayer: " ++ show (waitingPlayer g) ++ ", " ++
+               "NextMinionId: " ++ show (nextMinionId g) ++ ", " ++
+               "Field:\n" ++ show (fmap minimaybe (field g)) where
+    minimaybe :: Maybe Minion -> String
+    minimaybe Nothing = "  "
+    minimaybe (Just (MkMinion { minionId = i, owner = MkPlayer { leftPlayer = True } })) = show i ++ ">"
+    minimaybe (Just (MkMinion { minionId = i, owner = MkPlayer { leftPlayer = False } })) = "<" ++ show i
 
 type GameQueue = TQueue (Player, GameEvent)
 
@@ -70,11 +124,15 @@ data Game = MkGame
   , gameQueue  :: GameQueue }
 
 
-type Token = Word64
+type Token = String
 data Player = MkPlayer { playerClient :: TVar (Maybe Client)
                        , playerName   :: String
                        , playerToken  :: Token
+                       , leftPlayer   :: Bool
                        }
+
+instance Show Player where
+  show = playerName
 
 instance Eq Player where
   p == p' = (playerToken p) == (playerToken p')

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -457,5 +458,25 @@ public class BattleField extends Group {
             visiblePopUp.remove();
             visiblePopUp = null;
         }
+    }
+
+    @Override
+    protected void setParent(Group parent) {
+        if (parent == null) dispose();
+        super.setParent(parent);
+    }
+
+    @Override
+    public boolean remove() {
+        dispose();
+        return super.remove();
+    }
+
+    void dispose()
+    {
+        backgroundTexture.dispose();
+        attackSymbol.dispose();
+        healingSymbol.dispose();
+        clearChildren();
     }
 }

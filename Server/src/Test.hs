@@ -57,3 +57,15 @@ toStdout prefix handle = do
 
 sendClient :: ToJSON r => Handle -> r -> IO ()
 sendClient handle r = hPutStrLn handle $ toStrict $ encode r
+
+
+defaultStats = MkStats { f_attackdmg = 0
+                       , f_attackrange = 0
+                       , f_buffrange = 0
+                       , f_healing = 0
+                       , f_atkbuff = 0
+                       , f_healbuff = 0
+                       , f_shield = 0
+                       , f_maxhealth = 0 }
+
+p a b = Place $ MkPlacement (a, b) defaultStats

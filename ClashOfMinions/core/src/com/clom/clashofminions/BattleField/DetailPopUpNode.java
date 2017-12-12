@@ -95,4 +95,16 @@ public class DetailPopUpNode extends Group {
             }
         }
     }
+
+    @Override
+    public boolean remove() {
+        dispose();
+        return super.remove();
+    }
+
+    void dispose()
+    {
+        backgroundTexture.dispose();
+        for (Texture icon:icons) icon.dispose();
+    }
 }

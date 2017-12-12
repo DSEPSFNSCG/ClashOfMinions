@@ -34,6 +34,8 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
 
     final ClashOfMinions game;
 
+    ButtonNode backButton;
+
     ConnectionHandler connectionHandler;
     InetAddress address;
     int port;
@@ -70,7 +72,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         table.setPosition(0, stage.getHeight()/2);
         stage.addActor(table);
 
-        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
+        backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
         backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
@@ -143,6 +145,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
     @Override
     public void dispose() {
         stage.dispose();
+        backButton.remove();
     }
 
     private void update(float delta)
@@ -214,11 +217,13 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         preferences.flush();
         if (connectionHandler != null) connectionHandler.cancelSearchingGame();
         game.setScreen(new MainMenuScreen(game));
+        dispose();
     }
 
     private void enterGame()
     {
         game.setScreen(new GameScreen(game, connectionHandler));
+        dispose();
     }
 
 
@@ -250,6 +255,7 @@ public class LoadingScreen implements Screen, ConnectionHandlerDelegate {
         GameScreen gameScreen = new GameScreen(game, connectionHandler);
         gameScreen.restoredGame(xs, ys, valuesArray);
         game.setScreen(gameScreen);
+        dispose();
     }
 
   @Override

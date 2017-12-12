@@ -37,6 +37,9 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
 
     public final ClashOfMinions game;
 
+    ButtonNode continueButton;
+    ButtonNode quitButton;
+
     ConnectionHandler connectionHandler;
 
     Stage stage;
@@ -255,11 +258,11 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         table.setHeight(stage.getHeight());
         table.setPosition(0, 0);
 
-        ButtonNode continueButton = new ButtonNode(continueButtonTexture);
+        continueButton = new ButtonNode(continueButtonTexture);
         continueButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
         continueButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
 
-        ButtonNode quitButton = new ButtonNode(quitButtonTexture);
+        quitButton = new ButtonNode(quitButtonTexture);
         quitButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
         quitButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
 
@@ -332,6 +335,16 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
     public void dispose() {
         stage.dispose();
         backgroundTexture.dispose();
+        continueButton.remove();
+        quitButton.remove();
+
+        backgroundTexture.dispose();
+        pauseBackgroundTexture.dispose();
+        pauseButtonTexture.dispose();
+        turnButtonTexture.dispose();
+        quitButtonTexture.dispose();
+        continueButtonTexture.dispose();
+        nameTagTexture.dispose();
     }
 
     Boolean paused = false;
@@ -378,6 +391,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         preferences.flush();
 
         game.setScreen(new MainMenuScreen(game));
+        dispose();
     }
 
     private void placeAction()

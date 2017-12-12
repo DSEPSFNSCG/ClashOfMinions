@@ -30,6 +30,8 @@ public class SettingsScreen implements Screen {
     Stage stage;
     Table table;
 
+    ButtonNode backButton;
+
     SettingsScreen(final ClashOfMinions game)
     {
         this.game = game;
@@ -62,7 +64,7 @@ public class SettingsScreen implements Screen {
         stage.addActor(table);
 
         //BackButton
-        ButtonNode backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
+        backButton = new ButtonNode(new Texture(Gdx.files.internal("Button-Menu-Back.png")));
         backButton.setHeight(UIConstants.menuButtonHeight * stage.getHeight());
         backButton.setWidth(UIConstants.menuButtonWidth * stage.getHeight());
 
@@ -99,6 +101,8 @@ public class SettingsScreen implements Screen {
                 preferences.putString("userName", nameTextField.getText());
                 preferences.putString("serverAddress", addressTextField.getText());
                 preferences.flush();
+
+                dispose();
             }
         });
 
@@ -141,5 +145,6 @@ public class SettingsScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        backButton.remove();
     }
 }

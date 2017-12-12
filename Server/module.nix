@@ -10,6 +10,10 @@ in
   systemd.services.cardgame = {
     description = "Card Game Server";
     wantedBy = [ "multi-user.target" ];
-    serviceConfig.ExecStart = "${import ./default.nix}/bin/server ${toString port}";
+    serviceConfig = {
+      ExecStart = "${import ./default.nix}/bin/server ${toString port}";
+      Restart = "on-failure";
+      RestartSec = 1;
+    };
   };
 }

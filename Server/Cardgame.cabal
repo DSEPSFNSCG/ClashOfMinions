@@ -38,6 +38,7 @@ library
                      , transformers
                      , monad-stm
                      , matrix
+                     , vector
                      , network-simple
   default-language:    Haskell2010
 
