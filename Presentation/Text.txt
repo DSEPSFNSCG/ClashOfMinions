@@ -1,0 +1,26 @@
+Brett, Strategiespiel
+
+(Logo)
+For our project we developed a turn-based two player strategy-boardgame called Clash of Minions. 
+
+(Battlefield with a few minions)       
+
+The game takes place on a battlefield, where two groups of minions are fighting each other fiercely.       
+
+(Victory Screen)
+
+To win the game one of your minions has to reach the enemy’s baseline.          
+
+(Battlefield many minions)                                       
+
+Both players take turns in placing their customizable minions on the battlefield,
+from where on they move and fight on their own.              
+
+(Battlefield many minions with popup) 
+
+A minion can be created with different attributes, such as health, attack-damage, shield, several buffs and so on.                                                          
+
+To adjust the attributes of a minion the sliders below the battlefield can be used 
+to distribute a number of points per turn.
+
+The many different combinations enable different strategies for the players.
