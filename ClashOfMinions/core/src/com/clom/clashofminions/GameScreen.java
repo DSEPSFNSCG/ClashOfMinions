@@ -204,15 +204,15 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         nameTagSprite2.setPosition(battleField.getX() + battleField.getWidth() * (1 - 0.24f), battleField.getY() + battleField.getHeight() * (1 - 0.0f));
         stage.addActor(nameTagSprite2);
 
-        Label playerNameLabel = new Label(preferences.getString("userName"), UIConstants.labelStyle);
-        Float labelScale = 0.9f * nameTagSprite.getHeight()/playerNameLabel.getHeight();
+        Label playerNameLabel = new Label(preferences.getString("userName"), UIConstants.labelStyleSmall);
+        Float labelScale = 0.75f * nameTagSprite.getHeight()/playerNameLabel.getHeight();
         playerNameLabel.setColor(new Color(0x4169E1FF));
         playerNameLabel.setFontScale(labelScale);
         playerNameLabel.setBounds(nameTagSprite.getX(), nameTagSprite.getY(), nameTagSprite.getWidth(), nameTagSprite.getHeight());
         playerNameLabel.setAlignment(Align.center);
         stage.addActor(playerNameLabel);
 
-        Label playerNameLabel2 = new Label(preferences.getString("opponentName"), UIConstants.labelStyle);
+        Label playerNameLabel2 = new Label(preferences.getString("opponentName"), UIConstants.labelStyleSmall);
         playerNameLabel2.setColor(new Color(0xFF3030FF));
         playerNameLabel2.setFontScale(labelScale);
         playerNameLabel2.setBounds(nameTagSprite2.getX(), nameTagSprite2.getY(), nameTagSprite2.getWidth(), nameTagSprite2.getHeight());
@@ -225,7 +225,7 @@ public class GameScreen implements Screen, ConnectionHandlerDelegate {
         turnSprite.setPosition(battleField.getX() + battleField.getWidth() * 0.3925f, battleField.getY() + battleField.getHeight() * (-0.165f));
         stage.addActor(turnSprite);
 
-        turnLabel = new Label("", UIConstants.labelStyle);
+        turnLabel = new Label("", UIConstants.labelStyleSmall);
         turnLabel.setColor(new Color(0xFFFFFFFF));
         turnLabel.setFontScale(labelScale);
         turnLabel.setBounds(turnSprite.getX(), turnSprite.getY(), turnSprite.getWidth(), turnSprite.getHeight());

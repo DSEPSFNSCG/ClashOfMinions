@@ -3,6 +3,7 @@ package com.clom.clashofminions;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
@@ -50,7 +51,10 @@ public class ClashOfMinions extends Game {
 		//cam.viewportWidth = WIDTH;
 		//cam.update();
 
-		setScreen(new MainMenuScreen(this));
+		Preferences preferences = Gdx.app.getPreferences("UserData");
+		String name = preferences.getString("userName", "Bob");
+		if (name.equals("Bob")) setScreen(new SettingsScreen(this));
+		else setScreen(new MainMenuScreen(this));
 	}
 
 	@Override
